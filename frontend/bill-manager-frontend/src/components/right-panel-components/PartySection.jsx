@@ -42,7 +42,8 @@ const PartySection = ({ parties }) => {
   const displayParties = search ? filteredParties : demoParties;
 
   return (
-    <div className="relative mt-2 h-[50%] overflow-hidden p-4 bg-white shadow-md rounded-lg">
+    // overflow-hidden p-4 bg-white shadow-md rounded-lg
+    <div className="relative mt-2 h-[70%]">
       <div className="flex items-center mb-4">
         <img
           src="src/Logo/Party.png"
@@ -61,8 +62,8 @@ const PartySection = ({ parties }) => {
         />
         <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-800" />
       </div>
-      <ul className="overflow-y-auto max-h-[50%]">
-        {displayParties.slice(0, showMore ? displayParties.length : 10).map((party) => (
+      <ul className="overflow-y-auto">
+        {displayParties.slice(0, showMore ? displayParties.length : 5).map((party) => (
           <li
             key={party.id}
             className="px-4 py-2 cursor-pointer hover:bg-gray-200 border-b border-gray-300"

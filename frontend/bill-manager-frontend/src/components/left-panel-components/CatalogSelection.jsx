@@ -36,7 +36,7 @@ function CatalogSelection({ onSelectCatalog }) {
   const displayedCatalogs = search ? filteredCatalogs : catalogs.slice(0, 3);
 
   return (
-    <div className="relative text-sm top-0 left-0 h-[40%] bg-zinc-950 flex flex-col items-center text-primary">
+    <div className="relative text-sm top-0 left-0 h-[50%] bg-zinc-950 flex flex-col items-center text-primary">
       <div className="w-full px-4 pl-[20%]">
         <div className="relative mt-2">
           <ActionTooltip side="right" align="center" label="Search a new catalog">
