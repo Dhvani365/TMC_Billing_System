@@ -42,7 +42,7 @@ const PartySection = ({ parties }) => {
   const displayParties = search ? filteredParties : demoParties;
 
   return (
-    <div className="relative mt-2 h-[50%] overflow-hidden p-4 bg-white shadow-md rounded-lg">
+    <div className="relative h-[50%] overflow-hidden bg-white shadow-md rounded-lg">
       <div className="flex items-center mb-4">
         <img
           src="src/Logo/Party.png"

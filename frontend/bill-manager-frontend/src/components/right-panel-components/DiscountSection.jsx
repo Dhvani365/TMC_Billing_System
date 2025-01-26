@@ -12,7 +12,7 @@ const DiscountSection = () => {
   const [selectedPriceType, setSelectedPriceType] = useState('normalPrice');
 
   return (
-    <div className="relative h-[30%] mt-2 p-4 bg-white shadow-md rounded-lg">
+    <div className="relative h-[30%] p-4 bg-white shadow-md rounded-lg">
       <div className="flex items-center mb-4">
         <img
           src="src/Logo/Discount.png"

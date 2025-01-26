@@ -16,11 +16,13 @@ const Modal = ({ title, items, search, setSearch, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
       <div className="bg-white rounded-lg p-6 w-3/4 max-h-[90%] overflow-y-auto">
+      {/* Modal Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">{title}</h2>
           <button onClick={onClose} className="text-red-500 font-bold">X</button>
         </div>
 
+        {/* Search bar */}
         <div className="relative mb-4">
           <input
             type="text"
@@ -32,13 +34,18 @@ const Modal = ({ title, items, search, setSearch, onClose }) => {
           <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-black-800" />
         </div>
 
+        {/* Filtered Items List */}
         <Tooltip content={`Filtered ${title} items`}>
           <ul>
-            {filteredItems.map((item) => (
-              <li key={item.id} className="px-4 py-2 border-b hover:bg-gray-200">
-                {item.name}
-              </li>
-            ))}
+          {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <li key={item.id} className="px-4 py-2 border-b hover:bg-gray-200">
+                  {item.name}
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-2 text-gray-500">No items found</li>
+            )}
           </ul>
         </Tooltip>
       </div>

@@ -1,12 +1,11 @@
-import CatalogSelection from './left-panel-components/CatalogSelection';
-import ProductSelection from './left-panel-components/ProductSelection';
+import LeftSection from './left-panel-components/LeftSection';
+
 import { useState } from 'react';
 const LeftPanel = () => {
   const [selectedCatalog, setSelectedCatalog] = useState('');
   return (
     <div className="w-[100%]">
-      <CatalogSelection onSelectCatalog={setSelectedCatalog} />
-      <ProductSelection selectedCatalog={selectedCatalog} />
+      <LeftSection />
     </div>
   );
 };
