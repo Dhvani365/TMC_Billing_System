@@ -7,10 +7,12 @@ const Homepage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex flex-1">
-        <LeftPanel />
-        <MainPanel />
-        <RightPanel />
+      <div className="grid grid-cols-2">
+        <div className="grid grid-cols-2">
+          <LeftPanel />
+          <RightPanel />
+        </div>
+        <MainPanel />        
       </div>
     </div>
   );

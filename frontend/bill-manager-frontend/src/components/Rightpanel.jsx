@@ -1,8 +1,12 @@
+import PartySection from './right-panel-components/PartySection';
+import DiscountSection from './right-panel-components/DiscountSection';
+
 const RightPanel = () => {
     return (
-      <aside className="w-1/4 bg-gray-100 p-4">
-        <h2>Right Panel</h2>
-      </aside>
+      <div className="w-[100%] bg-gray-100 text-sm max-h-[100%]">
+        <PartySection />
+        <DiscountSection />
+      </div>
     );
   };
   

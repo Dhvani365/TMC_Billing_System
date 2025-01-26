@@ -1,16 +1,13 @@
-import CatalogSelection from './CatalogSelection';
-import ProductSelection from './ProductSelection';
-import PartySection from './PartySection';
-import DiscountSection from './DiscountSection';
-
+import CatalogSelection from './left-panel-components/CatalogSelection';
+import ProductSelection from './left-panel-components/ProductSelection';
+import { useState } from 'react';
 const LeftPanel = () => {
+  const [selectedCatalog, setSelectedCatalog] = useState('');
   return (
-    <aside className="w-1/4 bg-gray-600 p-4">
-      <CatalogSelection />
-      <ProductSelection />
-      <PartySection />
-      <DiscountSection />
-    </aside>
+    <div className="w-[100%]">
+      <CatalogSelection onSelectCatalog={setSelectedCatalog} />
+      <ProductSelection selectedCatalog={selectedCatalog} />
+    </div>
   );
 };
 
