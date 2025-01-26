@@ -11,8 +11,9 @@ const DiscountSection = () => {
 
   const [selectedPriceType, setSelectedPriceType] = useState('normalPrice');
 
+  // mt-2 p-4 bg-white shadow-md rounded-lg
   return (
-    <div className="relative h-[30%] mt-2 p-4 bg-white shadow-md rounded-lg">
+    <div className="h-[50%] mt-3">
       <div className="flex items-center mb-4">
         <img
           src="src/Logo/Discount.png"
@@ -21,7 +22,7 @@ const DiscountSection = () => {
         />
         <h2 className="text-sm font-bold">Discounts</h2>
       </div>
-      <ul className="overflow-y-auto max-h-[100%]">
+      <ul className="overflow-y-auto">
         <li>
           <button
             className="w-full text-center px-4 py-2 hover:bg-slate-200 rounded justify-center"
