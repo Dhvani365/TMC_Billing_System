@@ -5,15 +5,11 @@ import RightPanel from '../components/Rightpanel';
 
 const Homepage = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
-      <div className="grid grid-cols-2">
-        <div className="grid grid-cols-2">
           <LeftPanel />
           <RightPanel />
-        </div>
         <MainPanel />        
-      </div>
     </div>
   );
 };

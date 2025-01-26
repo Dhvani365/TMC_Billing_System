@@ -1,5 +1,5 @@
-import PartySection from './right-panel-components/PartySection';
-import DiscountSection from './right-panel-components/DiscountSection';
+// import PartySection from './right-panel-components/PartySection';
+// import DiscountSection from './right-panel-components/DiscountSection';
 import RightSection from './right-panel-components/RightSection';
 
 const RightPanel = () => {
