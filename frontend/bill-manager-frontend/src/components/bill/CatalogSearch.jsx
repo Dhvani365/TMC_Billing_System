@@ -17,7 +17,7 @@ const CatalogSearch = ({ options, onSelect, onClear }) => {
           placeholder="Search Catalog..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full p-2 pl-10 pr-10 rounded-lg bg-[#011627] border border-[#F6AE2D]"
+          className="w-full p-2 pl-10 pr-10 rounded-md bg-zinc-800"
         />
         <FaSearch className="absolute left-3 top-3 text-[#F6AE2D]" />
         {query && (
@@ -31,7 +31,7 @@ const CatalogSearch = ({ options, onSelect, onClear }) => {
         )}
       </div>
       {filteredOptions.length > 0 && (
-        <ul className="bg-[#011627] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
+        <ul className="bg-zinc-600  mt-3 rounded-md max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
@@ -39,7 +39,7 @@ const CatalogSearch = ({ options, onSelect, onClear }) => {
                 onSelect(option);
                 setQuery(option); // Set the selected catalog as the query
               }}
-              className="p-2 cursor-pointer hover:bg-[#F6AE2D]"
+              className="p-2 cursor-pointer hover:bg-blue-600"
             >
               {option}
             </li>

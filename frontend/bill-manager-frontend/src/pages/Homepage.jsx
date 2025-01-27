@@ -5,17 +5,10 @@ const Homepage = () => {
   return (
     <div className="h-screen flex flex-col">
       <Navbar />
-      <div className="flex-grow h-full">
+      {/* <div className="w-full h-full"> */}
         <BillSystem />
+      {/* </div> */}
       </div>
-// =======
-//     <div className="min-h-screen">
-//       <Navbar />
-//           <LeftPanel />
-//           <RightPanel />
-//         <MainPanel />        
-// >>>>>>> main
-    </div>
   );
 };
 
