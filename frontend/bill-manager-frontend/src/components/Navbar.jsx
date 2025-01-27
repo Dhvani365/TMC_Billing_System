@@ -3,7 +3,7 @@ import { FaHome, FaInfoCircle, FaUser } from 'react-icons/fa';
 
 const Navbar = () => {
   return (
-    <nav className="bg-gray-900 text-white p-4 flex justify-between items-center">
+    <nav className="bg-gray-900  text-white p-4 flex justify-between items-center">
       <div className="flex items-center space-x-4">
         <FaHome className="text-[#F6AE2D]" />
         <h1 className="text-xl font-bold">My Bill</h1>

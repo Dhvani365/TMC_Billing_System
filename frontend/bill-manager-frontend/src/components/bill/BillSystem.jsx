@@ -5,6 +5,7 @@ import PartySearch from "./PartySearch";
 import PricingSelector from "./PricingSelector";
 import QuantityInput from "./QuantityInput";
 import BillArea from "./BillArea";
+import BillManager from "./BillManager";
 
 const BillSystem = () => {
   const [catalog, setCatalog] = useState("");
@@ -13,6 +14,8 @@ const BillSystem = () => {
   const [pricingType, setPricingType] = useState("Normal");
   const [quantity, setQuantity] = useState(1);
   const [bill, setBill] = useState([]);
+  const [savedBills, setSavedBills] = useState([]);
+  const [selectedBill, setSelectedBill] = useState(null);
 
   // Mock data
   const catalogs = ["Electronics", "Clothing", "Furniture"];
@@ -92,35 +95,47 @@ const BillSystem = () => {
     setQuantity(1);
   };
 
+  const handleSaveBill = (currentBill) => {
+    const newBill = { items: currentBill, date: new Date().toISOString() };
+    setSavedBills([...savedBills, newBill]);
+    handleReset();
+  };
+
+  const handleSelectBill = (bill) => {
+    setSelectedBill(bill);
+    setBill(bill.items);
+  };
+
   return (
     <div className="flex-grow h-full bg-[#011627] text-[#FDFFFC] flex">
       {/* Left Section: Selection Area */}
-      <div className="w-2/3 p-6 border-r border-[#F6AE2D] grid grid-cols-2 grid-rows-2 gap-4">
-        <div className="border border-[#F6AE2D] p-4 rounded-lg">
+      <div className="w-2/5 p-6 border-r-2 border-[#F6AE2D] grid grid-cols-2 grid-rows-2 gap-4">
+        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
           {/* Catalog Search */}
           <CatalogSearch
             options={catalogs}
             onSelect={handleCatalogSelect}
             onClear={() => handleCatalogSelect("")}
+            selectedValue={catalog}
           />
           {/* Recent Catalogs */}
           <div className="mt-4">
             <h3 className="text-lg font-bold mb-2">Recent Catalogs</h3>
-            <ul>
+            <div className="flex flex-wrap gap-2">
               {recentCatalogs.map((item, index) => (
-                <li
+                <span
                   key={index}
                   onClick={() => handleCatalogSelect(item)}
-                  className="cursor-pointer hover:text-[#F6AE2D]"
+                  className="cursor-pointer hover:text-[#FCFFFD] hover:bg-[#F6AE2D] px-3 py-1 border border-[#F6AE2D] rounded-full"
                 >
                   {item}
-                </li>
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
 
-        <div className="border border-[#F6AE2D] p-4 rounded-lg">
+        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
           {/* Product Search */}
           {catalog ? (
             <>
@@ -130,21 +145,24 @@ const BillSystem = () => {
                   handleProductSelect(products[catalog].find((p) => p.name === selectedProduct))
                 }
                 onClear={() => handleProductSelect(null)}
+                selectedValue={product ? product.name : ""}
               />
               {/* Recent Products */}
               <div className="mt-4">
                 <h3 className="text-lg font-bold mb-2">Recent Products</h3>
-                <ul>
+                <div className="flex flex-wrap gap-2">
                   {recentProducts[catalog].map((item, index) => (
-                    <li
+                    <span
                       key={index}
-                      onClick={() => handleProductSelect(products[catalog].find((p) => p.name === item))}
-                      className="cursor-pointer hover:text-[#F6AE2D]"
+                      onClick={() =>
+                        handleProductSelect(products[catalog].find((p) => p.name === item))
+                      }
+                      className="cursor-pointer hover:text-[#FCFFFD] hover:bg-[#F6AE2D] px-3 py-1 border border-[#F6AE2D] rounded-full"
                     >
                       {item}
-                    </li>
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
             </>
           ) : (
@@ -152,7 +170,7 @@ const BillSystem = () => {
           )}
         </div>
 
-        <div className="border border-[#F6AE2D] p-4 rounded-lg">
+        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
           {/* Party Search */}
           {product ? (
             <>
@@ -160,21 +178,22 @@ const BillSystem = () => {
                 options={parties}
                 onSelect={handlePartySelect}
                 onClear={() => handlePartySelect("")}
+                selectedValue={party}
               />
               {/* Recent Parties */}
               <div className="mt-4">
                 <h3 className="text-lg font-bold mb-2">Recent Parties</h3>
-                <ul>
+                <div className="flex flex-wrap gap-2">
                   {recentParties.map((item, index) => (
-                    <li
+                    <span
                       key={index}
                       onClick={() => handlePartySelect(item)}
-                      className="cursor-pointer hover:text-[#F6AE2D]"
+                      className="cursor-pointer hover:text-[#FCFFFD] hover:bg-[#F6AE2D] px-3 py-1 border border-[#F6AE2D] rounded-full"
                     >
                       {item}
-                    </li>
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
             </>
           ) : (
@@ -182,7 +201,7 @@ const BillSystem = () => {
           )}
         </div>
 
-        <div className="border border-[#F6AE2D] p-4 rounded-lg">
+        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
           {/* Pricing Selector and Quantity Input */}
           {party ? (
             <>
@@ -205,12 +224,17 @@ const BillSystem = () => {
         </div>
       </div>
 
-      {/* Right Section: Bill Viewing Area */}
-      <div className="w-1/3 p-6">
-        <BillArea bill={bill} onRemove={handleRemoveItem} onReset={handleReset} />
+      {/* Middle Section: Bill Viewing Area */}
+      <div className="w-2/5 p-6 bg-[#FDFFFC]">
+        <BillArea bill={bill} onRemove={handleRemoveItem} onReset={handleReset} onSave={handleSaveBill} />
+      </div>
+
+      {/* Right Section: Bill Manager Area */}
+      <div className="w-1/5 p-6 bg-[#FDFFFC] border-l-2 border-[#F6AE2D] text-[#011627]">
+        <BillManager bills={savedBills} onSelect={handleSelectBill} />
       </div>
     </div>
   );
 };
 
-export default BillSystem;
+export default BillSystem;  

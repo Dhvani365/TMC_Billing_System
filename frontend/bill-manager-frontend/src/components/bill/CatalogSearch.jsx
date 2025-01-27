@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 
-const CatalogSearch = ({ options, onSelect, onClear }) => {
+const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    setQuery(selectedValue);
+  }, [selectedValue]);
 
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
-    <div className="mb-4    ">
+    <div className="mb-4">
       <label className="block mb-2">Select Catalog</label>
       <div className="relative">
         <input
@@ -45,6 +49,11 @@ const CatalogSearch = ({ options, onSelect, onClear }) => {
             </li>
           ))}
         </ul>
+      )}
+      {query && filteredOptions.length === 0 && (
+        <p className="mt-4 text-center text-[#F6AE2D]">
+          No catalogs match your search.
+        </p>
       )}
     </div>
   );
