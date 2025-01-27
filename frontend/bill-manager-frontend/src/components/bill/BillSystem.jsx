@@ -33,6 +33,14 @@ const BillSystem = () => {
   const parties = ["Party A", "Party B", "Party C"];
   const discounts = { Normal: 0, Wholesale: 10 }; // Discount percentage
 
+  const recentCatalogs = ["Electronics", "Clothing"];
+  const recentProducts = {
+    Electronics: ["Laptop", "Phone"],
+    Clothing: ["Shirt", "Jeans"],
+    Furniture: ["Chair", "Table"],
+  };
+  const recentParties = ["Party A", "Party B"];
+
   const addProductToBill = () => {
     if (!catalog || !product || !party || quantity <= 0) {
       alert("Please fill all fields before adding the product.");
@@ -71,6 +79,19 @@ const BillSystem = () => {
     setParty(selectedParty);
   };
 
+  const handleRemoveItem = (index) => {
+    setBill((prevBill) => prevBill.filter((_, i) => i !== index));
+  };
+
+  const handleReset = () => {
+    setBill([]);
+    setCatalog("");
+    setProduct(null);
+    setParty("");
+    setPricingType("Normal");
+    setQuantity(1);
+  };
+
   return (
     <div className="flex-grow h-full bg-[#011627] text-[#FDFFFC] flex">
       {/* Left Section: Selection Area */}
@@ -82,18 +103,50 @@ const BillSystem = () => {
             onSelect={handleCatalogSelect}
             onClear={() => handleCatalogSelect("")}
           />
+          {/* Recent Catalogs */}
+          <div className="mt-4">
+            <h3 className="text-lg font-bold mb-2">Recent Catalogs</h3>
+            <ul>
+              {recentCatalogs.map((item, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleCatalogSelect(item)}
+                  className="cursor-pointer hover:text-[#F6AE2D]"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <div className="border border-[#F6AE2D] p-4 rounded-lg">
           {/* Product Search */}
           {catalog ? (
-            <ProductSearch
-              options={products[catalog].map((p) => p.name)}
-              onSelect={(selectedProduct) =>
-                handleProductSelect(products[catalog].find((p) => p.name === selectedProduct))
-              }
-              onClear={() => handleProductSelect(null)}
-            />
+            <>
+              <ProductSearch
+                options={products[catalog].map((p) => p.name)}
+                onSelect={(selectedProduct) =>
+                  handleProductSelect(products[catalog].find((p) => p.name === selectedProduct))
+                }
+                onClear={() => handleProductSelect(null)}
+              />
+              {/* Recent Products */}
+              <div className="mt-4">
+                <h3 className="text-lg font-bold mb-2">Recent Products</h3>
+                <ul>
+                  {recentProducts[catalog].map((item, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handleProductSelect(products[catalog].find((p) => p.name === item))}
+                      className="cursor-pointer hover:text-[#F6AE2D]"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
           ) : (
             <p className="text-center text-[#F6AE2D]">Select a catalog first</p>
           )}
@@ -102,11 +155,28 @@ const BillSystem = () => {
         <div className="border border-[#F6AE2D] p-4 rounded-lg">
           {/* Party Search */}
           {product ? (
-            <PartySearch
-              options={parties}
-              onSelect={handlePartySelect}
-              onClear={() => handlePartySelect("")}
-            />
+            <>
+              <PartySearch
+                options={parties}
+                onSelect={handlePartySelect}
+                onClear={() => handlePartySelect("")}
+              />
+              {/* Recent Parties */}
+              <div className="mt-4">
+                <h3 className="text-lg font-bold mb-2">Recent Parties</h3>
+                <ul>
+                  {recentParties.map((item, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handlePartySelect(item)}
+                      className="cursor-pointer hover:text-[#F6AE2D]"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
           ) : (
             <p className="text-center text-[#F6AE2D]">Select a product first</p>
           )}
@@ -137,7 +207,7 @@ const BillSystem = () => {
 
       {/* Right Section: Bill Viewing Area */}
       <div className="w-1/3 p-6">
-        <BillArea bill={bill} />
+        <BillArea bill={bill} onRemove={handleRemoveItem} onReset={handleReset} />
       </div>
     </div>
   );
