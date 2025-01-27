@@ -5,13 +5,19 @@ import ActionTooltip from './ActionToolTip';
 import { Search } from 'lucide-react';
 import Modal from './Modal';
 import NavigationItem from './NavigationItem';
+import axios from 'axios'
 
-const catalogs = [
-  { id: '001', name: 'Catalog 1' },
-  { id: '002', name: 'Catalog 2' },
-  { id: '003', name: 'Catalog 3' },
-  { id: '004', name: 'Catalog 4' },
-];
+let catalogs = []; // Declare a variable to store the response
+
+axios.post('http://localhost:3000/api/getCatalog', {
+})
+.then(response => {
+  catalogs = response.data; // Store the response data in the catalogs variable
+  console.log('Catalogs fetched:', catalogs); // Optionally log the data
+})
+.catch(error => {
+  console.error('Error fetching catalogs:', error);
+});
 
 const ProductSelection = ({ selectedCatalog }) => {
   const productsData = {
@@ -131,7 +137,7 @@ function LeftSection() {
 
     if (query) {
       const filtered = catalogs.filter((catalog) =>
-        catalog.name.toLowerCase().includes(query.toLowerCase())
+        catalog.catalog_name.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredCatalogs(filtered);
     } else {
@@ -178,8 +184,8 @@ function LeftSection() {
         {/* Catalog list section */}
         <ScrollArea className="mt-4 w-full">
           {displayedCatalogs.map((catalog) => (
-            <div key={catalog.id} className="mb-4">
-              <NavigationItem id={catalog.id} name={catalog.name} onClick={() => handleCatalogSelect(catalog.id)} />
+            <div key={catalog.catalog_id} className="mb-4">
+              <NavigationItem id={catalog.catalog_id} name={catalog.catalog_name} onClick={() => handleCatalogSelect(catalog.catalog_id)} />
             </div>
           ))}
         </ScrollArea>
