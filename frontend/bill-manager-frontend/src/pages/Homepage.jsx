@@ -1,16 +1,14 @@
 import Navbar from '../components/Navbar';
-import LeftPanel from '../components/Leftpanel';
-import MainPanel from '../components/Mainpanel';
-import RightPanel from '../components/Rightpanel';
+import BillSystem from '../components/bill/BillSystem';
 
 const Homepage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="h-screen flex flex-col">
       <Navbar />
-          <LeftPanel />
-          <RightPanel />
-        <MainPanel />        
-    </div>
+      {/* <div className="w-full h-full"> */}
+        <BillSystem />
+      {/* </div> */}
+      </div>
   );
 };
 
