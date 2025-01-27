@@ -8,6 +8,13 @@ const Homepage = () => {
       <div className="flex-grow h-full">
         <BillSystem />
       </div>
+// =======
+//     <div className="min-h-screen">
+//       <Navbar />
+//           <LeftPanel />
+//           <RightPanel />
+//         <MainPanel />        
+// >>>>>>> main
     </div>
   );
 };
