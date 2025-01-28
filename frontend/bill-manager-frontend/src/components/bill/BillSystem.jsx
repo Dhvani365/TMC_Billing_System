@@ -127,7 +127,7 @@ const BillSystem = () => {
             selectedValue={catalog}
           />
           {/* Recent Catalogs */}
-          <div className="">
+          {/* <div className="">
             <h3 className="text-lg font-bold mb-2">Recent Catalogs</h3>
             <div className="flex flex-wrap gap-2">
               {recentCatalogs.map((item, index) => (
@@ -140,7 +140,8 @@ const BillSystem = () => {
                 </span>
               ))}
             </div>
-          </div>
+          </div> */}
+          
         </div>
 
         <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
@@ -164,7 +165,7 @@ const BillSystem = () => {
                 selectedValue={product ? product.name : ""}
               />
               {/* Recent Products */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <h3 className="text-lg font-bold mb-2">Recent Products</h3>
                 <div className="flex flex-wrap gap-2">
                   {recentProducts[catalog].map((item, index) => (
@@ -179,7 +180,7 @@ const BillSystem = () => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </>
           ) : (
             <div className="flex justify-center items-center h-full">
@@ -207,7 +208,7 @@ const BillSystem = () => {
                 selectedValue={party}
               />
               {/* Recent Parties */}
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <h3 className="text-lg font-bold mb-2">Recent Parties</h3>
                 <div className="flex flex-wrap gap-2">
                   {recentParties.map((item, index) => (
@@ -220,7 +221,7 @@ const BillSystem = () => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </>
           ) : (
             <div className="flex justify-center items-center h-full">

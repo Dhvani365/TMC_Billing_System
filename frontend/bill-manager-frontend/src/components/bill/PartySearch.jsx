@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
+import Modal from "./Modal";
 
 const PartySearch = ({ options, onSelect, onClear, selectedValue }) => {
   const [query, setQuery] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     setQuery(selectedValue);
@@ -55,6 +57,26 @@ const PartySearch = ({ options, onSelect, onClear, selectedValue }) => {
           No parties match your search.
         </p>
       )}
+      {/* Show more button */}
+      {filteredOptions.length > 1 && (
+          <div className="flex justify-center mt-10">
+            <button
+              className="text-white underline hover:text-yellow-500"
+              onClick={() => setShowModal(true)}
+            >
+              Show More...
+            </button>
+            </div>
+          )}
+
+          {/* Modal section */}
+          {showModal && (
+            <Modal
+              title="All Parties"
+              items={options}
+              onClose={() => setShowModal(false)}
+            />
+          )}
     </div>
   );
 };

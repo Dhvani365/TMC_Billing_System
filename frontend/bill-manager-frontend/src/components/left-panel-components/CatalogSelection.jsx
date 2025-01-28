@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Separator } from '../../components/ui/separator';
 import { ScrollArea } from '../../components/ui/scroll-area';
-import ActionTooltip from './ActionToolTip';
+import ActionTooltip from '../bill/ActionTooltip';
 import { Search } from 'lucide-react';
 import Modal from './Modal';
 import NavigationItem from './NavigationItem';

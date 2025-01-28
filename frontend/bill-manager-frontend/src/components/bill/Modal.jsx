@@ -1,8 +1,9 @@
 /* Modal.jsx */
 import { Search } from 'lucide-react';
-import { Tooltip } from '../../components/ui/tooltip';
-
-const Modal = ({ title, items, search, setSearch, onClose }) => {
+import ActionTooltip from './ActionTooltip';
+import { useState } from 'react';
+const Modal = ({ title, items, onClose }) => {
+  const [search, setSearch] = useState("");
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
@@ -32,7 +33,7 @@ const Modal = ({ title, items, search, setSearch, onClose }) => {
           <Search className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-black-800" />
         </div>
 
-        <Tooltip content={`Filtered ${title} items`}>
+        <ActionTooltip content={`Filtered ${title} items`}>
           <ul>
             {filteredItems.map((item) => (
               <li key={item.id} className="px-4 py-2 border-b hover:bg-gray-200">
@@ -40,7 +41,7 @@ const Modal = ({ title, items, search, setSearch, onClose }) => {
               </li>
             ))}
           </ul>
-        </Tooltip>
+        </ActionTooltip>
       </div>
     </div>
   );

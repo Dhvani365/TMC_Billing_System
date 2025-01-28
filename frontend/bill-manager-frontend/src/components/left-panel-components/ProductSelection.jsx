@@ -1,7 +1,7 @@
 /* ProductSection.jsx */
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import ActionTooltip from '../left-panel-components/ActionToolTip';
+import ActionTooltip from '../bill/ActionTooltip';
 import NavigationItem from './NavigationItem';
 
 const ProductSelection = ({ selectedCatalog }) => {
