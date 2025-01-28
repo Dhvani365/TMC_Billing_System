@@ -35,7 +35,7 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
         )}
       </div>
       {filteredOptions.length > 0 && (
-        <ul className="bg-[#011627] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
+        <ul className="bg-[#0a2438] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}

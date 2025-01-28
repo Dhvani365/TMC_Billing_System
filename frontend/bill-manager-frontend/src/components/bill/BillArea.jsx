@@ -55,9 +55,16 @@ const BillArea = ({ bill, onRemove, onReset, onSave }) => {
   };
 
   return (
-    <div className="max-w-xl">
+    <div>
       <div className="flex justify-between items-center mb-4">
+      <div className="flex items-center ">
+      <img
+            src="src/Logo/Bill.png"
+            alt="Bill Logo"
+            className="w-13 h-12 mr-4"
+          />
         <h2 className="text-xl font-bold text-[#F6AE2D]">Bill Details</h2>
+      </div>
         <div className="flex space-x-2">
           <button
             onClick={handleSave}
@@ -115,7 +122,7 @@ const BillArea = ({ bill, onRemove, onReset, onSave }) => {
                         onClick={() => handleRemove(startIndex + index)}
                         className="text-red-500 hover:text-red-700 flex items-center justify-center m-auto"
                       >
-                        <FaTimes />
+                        <FaTimes size={20} />
                       </button>
                     </td>
                   </tr>
