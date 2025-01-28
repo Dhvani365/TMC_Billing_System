@@ -59,7 +59,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
       )}
 
       {/* Show more button */}
-      {filteredOptions.length > 3 && (
+      {filteredOptions.length > 4 && (
           <div className="flex justify-center mt-10">
             <button
               className="text-white underline hover:text-yellow-500"
@@ -75,6 +75,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
             <Modal
               title="All Catalogs"
               items={options}
+              onSelect={onSelect}
               onClose={() => setShowModal(false)}
             />
           )}

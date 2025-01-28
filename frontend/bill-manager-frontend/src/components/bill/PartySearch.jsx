@@ -58,7 +58,7 @@ const PartySearch = ({ options, onSelect, onClear, selectedValue }) => {
         </p>
       )}
       {/* Show more button */}
-      {filteredOptions.length > 1 && (
+      {filteredOptions.length > 4 && (
           <div className="flex justify-center mt-10">
             <button
               className="text-white underline hover:text-yellow-500"
@@ -74,6 +74,7 @@ const PartySearch = ({ options, onSelect, onClear, selectedValue }) => {
             <Modal
               title="All Parties"
               items={options}
+              onSelect={onSelect}
               onClose={() => setShowModal(false)}
             />
           )}

@@ -36,7 +36,7 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
           />
         )}
       </div>
-      {filteredOptions.length > 0 && (
+      {filteredOptions.length > 4 && (
         <ul className="bg-[#0a2438] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
@@ -74,6 +74,7 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
             <Modal
               title="All Products"
               items={options}
+              onSelect={onSelect}
               onClose={() => setShowModal(false)}
             />
           )}
