@@ -152,7 +152,7 @@ const BillSystem = () => {
             alt="Party Logo"
             className="w-10 h-10 mr-4"
           />
-          <h3 className="text-2xl text-white font-bold">Products</h3>
+          <h3 className="text-2xl text-white font-bold">Parties</h3>
           </div>
           {/* Party Search */}
           {product ? (
