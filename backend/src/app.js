@@ -43,6 +43,45 @@ app.post("/api/getCatalog", (req, res) => {
   });
 });
 
+app.post("/api/getProduct", (req, res) => {
+  // Query to get all products with their catalog IDs
+  const optimizedQuery = `
+    SELECT p.*, cp.catalog_id
+    FROM products p
+    LEFT JOIN catalog_products cp ON p.product_id = cp.product_id
+  `;
+
+  con.query(optimizedQuery, (err, products) => {
+    if (err) {
+      console.error("Error fetching products: ", err);
+      return res.status(500).json({ error: "An error occurred while fetching products." });
+    }
+
+    if (products.length === 0) {
+      return res.status(404).json({ error: "No products found." });
+    }
+
+    // Group products by catalog_id
+    const groupedProducts = products.reduce((acc, product) => {
+      const { catalog_id } = product;
+      if (!catalog_id) {
+        return acc; // Skip products without a catalog_id
+      }
+
+      // Initialize array for the catalog_id if it doesn't exist
+      if (!acc[catalog_id]) {
+        acc[catalog_id] = [];
+      }
+
+      // Push the product to the corresponding catalog_id
+      acc[catalog_id].push(product);
+      return acc;
+    }, {});
+
+    res.json(groupedProducts); // Send the grouped products as response
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

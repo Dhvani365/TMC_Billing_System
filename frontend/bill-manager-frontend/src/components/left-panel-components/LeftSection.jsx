@@ -19,34 +19,47 @@ axios.post('http://localhost:3000/api/getCatalog', {
   console.error('Error fetching catalogs:', error);
 });
 
+
 const ProductSelection = ({ selectedCatalog }) => {
-  const productsData = {
-    '001': [
-      { id: '201', name: 'Product 1' },
-      { id: '202', name: 'Product 2' },
-      { id: '203', name: 'Product 3' },
-      { id: '204', name: 'Product 4' },
-      { id: '205', name: 'Product 5' },
-    ],
-    '002': [
-      { id: '206', name: 'Product 6' },
-      { id: '207', name: 'Product 7' },
-      { id: '208', name: 'Product 8' },
-      { id: '209', name: 'Product 9' },
-      { id: '210', name: 'Product 10' },
-    ],
-    '003': [
-      { id: '211', name: 'Product 11' },
-      { id: '212', name: 'Product 12' },
-      { id: '213', name: 'Product 13' },
-      { id: '214', name: 'Product 14' },
-    ],
-    '004': [
-      { id: '215', name: 'Product 15' },
-      { id: '216', name: 'Product 16' },
-      { id: '217', name: 'Product 17' },
-    ],
-  };
+  // const productsData = {
+  //   '001': [
+  //     { id: '201', name: 'Product 1' },
+  //     { id: '202', name: 'Product 2' },
+  //     { id: '203', name: 'Product 3' },
+  //     { id: '204', name: 'Product 4' },
+  //     { id: '205', name: 'Product 5' },
+  //   ],
+  //   '002': [
+  //     { id: '206', name: 'Product 6' },
+  //     { id: '207', name: 'Product 7' },
+  //     { id: '208', name: 'Product 8' },
+  //     { id: '209', name: 'Product 9' },
+  //     { id: '210', name: 'Product 10' },
+  //   ],
+  //   '003': [
+  //     { id: '211', name: 'Product 11' },
+  //     { id: '212', name: 'Product 12' },
+  //     { id: '213', name: 'Product 13' },
+  //     { id: '214', name: 'Product 14' },
+  //   ],
+  //   '004': [
+  //     { id: '215', name: 'Product 15' },
+  //     { id: '216', name: 'Product 16' },
+  //     { id: '217', name: 'Product 17' },
+  //   ],
+  // };
+
+  let productsData = []
+
+  axios.post('http://localhost:3000/api/getProduct', {
+  })
+  .then(response => {
+    productsData = response.data; // Store the response data in the catalogs variable
+    console.log('productsData fetched:', productsData); // Optionally log the data
+  })
+  .catch(error => {
+    console.error('Error fetching productsData:', error);
+  });
 
   const [search, setSearch] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
