@@ -122,6 +122,29 @@ app.post("/api/getDiscountStructure", (req, res) => {
   });
 });
 
+app.post("/api/addBill", (req, res) => {
+  // Extract the request body
+  const { client_id, bill_date, total_amount, discount_type, discount_percentage } = req.body;
+
+  const optimizedQuery = `
+    INSERT INTO bills (client_id, bill_date, total_amount, discount_type, discount_percentage) 
+    VALUES (?, ?, ?, ?, ?);
+  `;
+
+  // Execute the query with parameterized values
+  con.query(optimizedQuery, [client_id, bill_date, total_amount, discount_type, discount_percentage], (err, result) => {
+    if (err) {
+      console.error("Error inserting bill: ", err);
+      return res.status(500).json({ error: "An error occurred while adding the bill." });
+    }
+
+    res.status(201).json({
+      message: "Bill added successfully!",
+      bill_id: result.insertId
+    });
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
