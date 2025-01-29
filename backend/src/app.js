@@ -82,6 +82,46 @@ app.post("/api/getProduct", (req, res) => {
   });
 });
 
+app.post("/api/getClient", (req, res) => {
+  // Query to get all products with their catalog IDs
+  const optimizedQuery = `
+    SELECT * FROM CLIENTS
+  `;
+
+  con.query(optimizedQuery, (err, clients) => {
+    if (err) {
+      console.error("Error fetching products: ", err);
+      return res.status(500).json({ error: "An error occurred while fetching products." });
+    }
+
+    if (clients.length === 0) {
+      return res.status(404).json({ error: "No clients found." });
+    }
+
+    res.json(clients); // Send the grouped products as response
+  });
+});
+
+app.post("/api/getDiscountStructure", (req, res) => {
+  // Query to get all products with their catalog IDs
+  const optimizedQuery = `
+    SELECT * FROM client_discount_structure
+  `;
+
+  con.query(optimizedQuery, (err, DiscountStructure) => {
+    if (err) {
+      console.error("Error fetching DiscountStructure: ", err);
+      return res.status(500).json({ error: "An error occurred while fetching DiscountStructure." });
+    }
+
+    if (DiscountStructure.length === 0) {
+      return res.status(404).json({ error: "No DiscountStructure found." });
+    }
+
+    res.json(DiscountStructure); // Send the grouped products as response
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
