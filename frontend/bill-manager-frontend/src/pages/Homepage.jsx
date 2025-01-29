@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import BillSystem from '../components/bill/BillSystem';
+import BillSystem from '../components/BillSystem';
 
 const Homepage = () => {
   return (

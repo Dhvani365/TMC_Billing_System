@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { FaTimes, FaPrint, FaRedo, FaArrowLeft, FaArrowRight, FaSave } from 'react-icons/fa';
 
 const BillArea = ({ bill, onRemove, onReset, onSave }) => {
+  console.log(bill)
   const contentRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -99,7 +100,10 @@ const BillArea = ({ bill, onRemove, onReset, onSave }) => {
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">#</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Product</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Party</th>
+                  <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Pricing Type</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Price</th>
+                  <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Discount(%)</th>
+                  <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Discount</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Qty</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center">Total</th>
                   <th className="border-b-2 border-[#F6AE2D] py-2 text-center print-hidden">Actions</th>
@@ -114,7 +118,10 @@ const BillArea = ({ bill, onRemove, onReset, onSave }) => {
                     <td className="py-2 text-center">{startIndex + index + 1}</td>
                     <td className="py-2 text-center">{item.product}</td>
                     <td className="py-2 text-center">{item.party}</td>
+                    <td className="py-2 text-center">{item.pricingType}</td>
                     <td className="py-2 text-center">₹{item.price}</td>
+                    <td className="py-2 text-center">{item.discount_perc}</td>
+                    <td className="py-2 text-center">₹{item.discount}</td>
                     <td className="py-2 text-center">{item.quantity}</td>
                     <td className="py-2 text-center">₹{item.total}</td>
                     <td className="py-2 text-center print-hidden">

@@ -1,4 +1,4 @@
-import BillSystem from "./bill/BillSystem";
+import BillSystem from "./BillSystem";
 
 const MainPanel = () => {
     return (

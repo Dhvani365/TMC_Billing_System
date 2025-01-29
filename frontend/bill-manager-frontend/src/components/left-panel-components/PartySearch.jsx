@@ -2,25 +2,31 @@ import { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import Modal from "./Modal";
 
-const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
+const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
+  console.log("Options in Party Search: ", parties)
+  console.log("PartySearch component rendered!");
+
+  const [options, setOptions] = useState({});
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setQuery(selectedValue);
+    setQuery(selectedValue || "");
+    const opts=parties.length > 0 ? parties.map((p) => p.client_name) : []
+    setOptions(opts)
   }, [selectedValue]);
 
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredOptions = options?.length
+  ? options.filter((option) => option.toLowerCase().includes(query.toLowerCase()))
+  : [];
 
   return (
     <div className="mb-4">
-      <label className="block mb-2">Select Catalog</label>
+      <label className="block mb-2">Select Party</label>
       <div className="relative">
         <input
           type="text"
-          placeholder="Search Catalog..."
+          placeholder="Search Party..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full p-2 pl-10 pr-10 rounded-lg bg-[#011627] border border-[#F6AE2D]"
@@ -43,7 +49,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
               key={index}
               onClick={() => {
                 onSelect(option);
-                setQuery(option); // Set the selected catalog as the query
+                setQuery(option); // Set the selected party as the query
               }}
               className="p-2 cursor-pointer hover:bg-[#F6AE2D]"
             >
@@ -54,10 +60,9 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
       )}
       {query && filteredOptions.length === 0 && (
         <p className="mt-4 text-center text-[#F6AE2D]">
-          No catalogs match your search.
+          No parties match your search.
         </p>
       )}
-
       {/* Show more button */}
       {filteredOptions.length > 4 && (
           <div className="flex justify-center mt-10">
@@ -73,7 +78,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
           {/* Modal section */}
           {showModal && (
             <Modal
-              title="All Catalogs"
+              title="All Parties"
               items={options}
               onSelect={onSelect}
               onClose={() => setShowModal(false)}
@@ -83,4 +88,4 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
   );
 };
 
-export default CatalogSearch;
+export default PartySearch;
