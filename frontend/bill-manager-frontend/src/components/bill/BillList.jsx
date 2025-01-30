@@ -6,7 +6,7 @@ const BillList = ({ bills, onSelect }) => {
       <h2 className="text-xl font-bold mb-4">Saved Bills</h2>
       <ul className="list-disc pl-5">
         {bills.map((bill, index) => (
-          <li key={index} className="cursor-pointer hover:text-[#F6AE2D]" onClick={() => onSelect(bill)}>
+          <li key={index} className="cursor-pointer hover:font-bold hover:text-[#F6AE2D]" onClick={() => onSelect(bill)}>
             {new Date(bill.date).toLocaleString()}
           </li>
         ))}

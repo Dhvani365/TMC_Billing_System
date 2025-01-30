@@ -64,7 +64,7 @@ const BillArea = ({ bill, onRemove, onReset, onSave }) => {
             alt="Bill Logo"
             className="w-13 h-12 mr-4"
           />
-        <h2 className="text-xl font-bold text-[#F6AE2D]">Bill Details</h2>
+        <h2 className="text-2xl font-bold text-[#F6AE2D]">Bill Details</h2>
       </div>
         <div className="flex space-x-2">
           <button

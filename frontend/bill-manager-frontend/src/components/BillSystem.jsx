@@ -231,7 +231,7 @@ const BillSystem = () => {
       </div>
 
       {/* Right Section: Bill Manager Area */}
-      <div className="w-1/5 p-6 bg-[#FDFFFC] border-l-2 border-[#F6AE2D] text-[#011627]">
+      <div className="w-1/5 p-2 bg-zinc-500 border-l-2 border-[#F6AE2D] text-black">
         <BillManager bills={savedBills} onSelect={handleSelectBill} />
       </div>
     </div>
