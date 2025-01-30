@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import Modal from "./Modal";
 
-const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
+const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -16,19 +16,19 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
 
   return (
     <div className="mb-4">
-      <label className="block mb-2">Select Catalog</label>
+      <label className="block mb-2">Select Product</label>
       <div className="relative">
         <input
           type="text"
-          placeholder="Search Catalog..."
+          placeholder="Search Product..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full p-2 pl-10 pr-5 rounded-lg bg-zinc-800"
+          className="w-full p-2 pl-10 pr-10 rounded-lg bg-[#011627] border border-[#F6AE2D]"
         />
         <FaSearch className="absolute left-3 top-3 text-[#F6AE2D]" />
         {query && (
           <FaTimes
-            className="absolute right-3 top-2 text-[#F6AE2D] cursor-pointer"
+            className="absolute right-3 top-3 text-[#F6AE2D] cursor-pointer"
             onClick={() => {
               setQuery("");
               onClear();
@@ -36,16 +36,16 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
           />
         )}
       </div>
-      {filteredOptions.length > 0 && (
-        <ul className="bg-zinc-500 mt-3 rounded-lg max-h-40 overflow-auto">
+      {filteredOptions.length > 4 && (
+        <ul className="bg-[#0a2438] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
               onClick={() => {
                 onSelect(option);
-                setQuery(option); // Set the selected catalog as the query
+                setQuery(option); // Set the selected product as the query
               }}
-              className="p-2 cursor-pointer hover:bg-blue-500 hover:text-black hover:font-bold text-lg"
+              className="p-2 cursor-pointer hover:bg-[#F6AE2D]"
             >
               {option}
             </li>
@@ -54,15 +54,14 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
       )}
       {query && filteredOptions.length === 0 && (
         <p className="mt-4 text-center text-[#F6AE2D]">
-          No catalogs match your search.
+          No products match your search.
         </p>
       )}
-
       {/* Show more button */}
-      {filteredOptions.length > 4 && (
-          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto hover:bg-blue-500">
+      {filteredOptions.length > 1 && (
+          <div className="flex justify-center mt-10">
             <button
-              className="text-white underline hover:text-black"
+              className="text-white underline hover:text-yellow-500"
               onClick={() => setShowModal(true)}
             >
               Show More...
@@ -73,7 +72,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
           {/* Modal section */}
           {showModal && (
             <Modal
-              title="All Catalogs"
+              title="All Products"
               items={options}
               onSelect={onSelect}
               onClose={() => setShowModal(false)}
@@ -83,4 +82,4 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
   );
 };
 
-export default CatalogSearch;
+export default ProductSearch;

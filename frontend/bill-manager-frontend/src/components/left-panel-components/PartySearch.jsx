@@ -2,17 +2,23 @@ import { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import Modal from "./Modal";
 
-const PartySearch = ({ options, onSelect, onClear, selectedValue }) => {
+const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
+  console.log("Options in Party Search: ", parties)
+  console.log("PartySearch component rendered!");
+
+  const [options, setOptions] = useState({});
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setQuery(selectedValue);
+    setQuery(selectedValue || "");
+    const opts=parties.length > 0 ? parties.map((p) => p.client_name) : []
+    setOptions(opts)
   }, [selectedValue]);
 
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredOptions = options?.length
+  ? options.filter((option) => option.toLowerCase().includes(query.toLowerCase()))
+  : [];
 
   return (
     <div className="mb-4">
