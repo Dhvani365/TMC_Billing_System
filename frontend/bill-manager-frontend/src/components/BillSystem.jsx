@@ -128,12 +128,19 @@ const BillSystem = () => {
   };
 
   return (
-    <div className="flex-grow h-full bg-[#011627] text-[#FDFFFC] flex">
+    <div className="flex-grow h-full bg-zinc-700 text-[#FDFFFC] flex">
       {/* Left Section: Selection Area */}
       <div className="w-2/5 p-6 border-r-2 border-[#F6AE2D] grid grid-cols-2 grid-rows-2 gap-4">
         {/* Catalog Selection */}
-        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
-          <h3 className="text-2xl text-white font-bold">Catalogs</h3>
+        <div className="bg-black p-3 rounded-lg flex flex-col">
+          <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
+        <img
+            src="src/Logo/Catalog.png"
+            alt="Catalog Logo"
+            className="w-8 h-8 mr-2"
+          />
+          <h3 className="text-xl text-white font-bold">Catalogs</h3>
+          </div>
           <CatalogSearch
             options={catalogs}
             onSelect={handleCatalogSelect}
@@ -142,9 +149,39 @@ const BillSystem = () => {
           />
         </div>
 
+
+        {/* Party Selection */}
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
+        <img
+            src="src/Logo/Party.png"
+            alt="Party Logo"
+            className="w-8 h-8 mr-2"
+          />
+          <h3 className="text-xl text-white font-bold">Party</h3>
+          </div>
+          {product ? (
+            <PartySearch
+              parties={parties}
+              onSelect={handlePartySelect}
+              onClear={() => handlePartySelect("")}
+              selectedValue={party}
+            />
+          ) : ( 
+           <p className="text-center text-[#F6AE2D] text-xl">Select a product first</p>
+          )}
+        </div>
+
         {/* Product Selection */}
-        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
-          <h3 className="text-2xl text-white font-bold">Products</h3>
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
+        <img
+            src="src/Logo/Product.png"
+            alt="Product Logo"
+            className="w-8 h-8 mr-2 bg-white rounded-full"
+          />
+          <h3 className="text-xl text-white font-bold">Products</h3>
+          </div>
           {catalog ? (
             <ProductSearch
               options={products.map((p) => p.product_name)}
@@ -161,31 +198,23 @@ const BillSystem = () => {
           )}
         </div>
 
-        {/* Party Selection */}
-        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
-          <h3 className="text-2xl text-white font-bold">Party</h3>
-          {product ? (
-            <PartySearch
-              parties={parties}
-              onSelect={handlePartySelect}
-              onClear={() => handlePartySelect("")}
-              selectedValue={party}
-            />
-          ) : ( 
-           <p className="text-center text-[#F6AE2D] text-xl">Select a product first</p>
-          )}
-        </div>
-
         {/* Pricing and Quantity Selection */}
-        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
-          <h3 className="text-2xl text-white font-bold">Pricing</h3>
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
+        <img
+            src="src/Logo/Sale.png"
+            alt="Sale Logo"
+            className="w-8 h-8 mr-2 bg-white rounded-full"
+          />
+          <h3 className="text-xl text-white font-bold">Pricing</h3>
+          </div>
           {party ? (
             <>
               <PricingSelector pricingType={pricingType} setPricingType={setPricingType} />
               <QuantityInput quantity={quantity} setQuantity={setQuantity} />
               <button
                 onClick={addProductToBill}
-                className="w-full mt-4 bg-[#F6AE2D] text-[#011627] py-2 rounded-xl hover:bg-opacity-90 transition"
+                className="w-full mt-4 bg-[#F6AE2D] text-[#011627] py-2 rounded-md hover:bg-blue-500 hover:font-bold"
               >
                 Add Product
               </button>
