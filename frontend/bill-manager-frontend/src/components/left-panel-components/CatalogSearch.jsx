@@ -11,8 +11,6 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
     setQuery(selectedValue?.catalog_name || selectedValue || "");
   }, [selectedValue]);
 
-  console.log("Query:", query); // Debugging
-
   const filteredOptions = options.filter((option) =>
     option.catalog_name.toLowerCase().includes(query.toLowerCase())
   );
@@ -41,15 +39,15 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
       </div>
 
       {filteredOptions.length > 0 ? (
-        <ul className="bg-zinc-500 mt-2 rounded-lg max-h-40 overflow-auto">
-          {filteredOptions.slice(0, 4).map((option) => (
+        <ul className="bg-zinc-700 mt-2 rounded-lg max-h-40 overflow-auto">
+          {filteredOptions.slice(0, 3).map((option) => (
             <li
               key={option.catalog_id}
               onClick={() => {
                 onSelect(option); // Send full object for selection
                 setQuery(option.catalog_name); // But store only the name for display
               }}
-              className="p-2 cursor-pointer hover:bg-blue-500 hover:text-black hover:font-bold text-lg"
+              className="p-2 cursor-pointer hover:bg-yellow-500 hover:text-black hover:font-bold text-lg"
             >
               {option.catalog_name}
             </li>
@@ -64,8 +62,8 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
       )}
 
       {/* Show more button (only if there are more than 4 options) */}
-      {options.length > 4 && (
-        <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto hover:bg-blue-500">
+      {options.length > 4 && !selectedValue && (
+        <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto bg-blue-500">
           <button
             className="text-white underline hover:text-black"
             onClick={() => setShowModal(true)}

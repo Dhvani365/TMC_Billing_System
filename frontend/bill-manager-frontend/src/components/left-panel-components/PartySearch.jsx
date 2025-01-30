@@ -3,8 +3,6 @@ import { FaSearch, FaTimes } from "react-icons/fa";
 import Modal from "./Modal";
 
 const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
-  console.log("Options in Party Search: ", parties)
-  console.log("PartySearch component rendered!");
 
   const [options, setOptions] = useState({});
   const [query, setQuery] = useState("");
@@ -42,8 +40,8 @@ const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
           />
         )}
       </div>
-      {filteredOptions.length > 0 && (
-        <ul className="bg-zinc-500 mt-3 rounded-lg max-h-40 overflow-auto">
+      {filteredOptions.slice(0, 3).length > 0 && (
+        <ul className="bg-zinc-700 mt-3 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
@@ -51,7 +49,7 @@ const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
                 onSelect(option);
                 setQuery(option); // Set the selected party as the query
               }}
-              className="p-2 cursor-pointer hover:bg-blue-500 hover:text-black hover:font-bold text-lg"
+              className="p-2 cursor-pointer hover:bg-yellow-500 hover:text-black hover:font-bold text-lg"
             >
               {option}
             </li>
@@ -64,8 +62,8 @@ const PartySearch = ({ parties, onSelect, onClear, selectedValue }) => {
         </p>
       )}
       {/* Show more button */}
-      {filteredOptions.length > 2 && (
-          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto hover:bg-blue-500">
+      {filteredOptions.length > 3 && !selectedValue && (
+          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto bg-blue-500">
             <button
               className="text-white underline hover:text-black"
               onClick={() => setShowModal(true)}

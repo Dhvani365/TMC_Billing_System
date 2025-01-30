@@ -55,7 +55,6 @@ const BillSystem = () => {
 
   // Get products based on selected catalog
   const products = catalog ? productsData[catalog.catalog_id] || [] : [];
-
   const addProductToBill = () => {
     if (!catalog || !product || !party || quantity <= 0) {
       alert("Please fill all fields before adding the product.");
@@ -231,7 +230,7 @@ const BillSystem = () => {
       </div>
 
       {/* Right Section: Bill Manager Area */}
-      <div className="w-1/5 p-2 bg-zinc-500 border-l-2 border-[#F6AE2D] text-black">
+      <div className="w-1/5 p-2 bg-zinc-100 border-l-2 border-[#F6AE2D] text-black">
         <BillManager bills={savedBills} onSelect={handleSelectBill} />
       </div>
     </div>

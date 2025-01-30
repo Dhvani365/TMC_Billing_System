@@ -7,11 +7,11 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setQuery(selectedValue);
+    setQuery(selectedValue || "");
   }, [selectedValue]);
 
   const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(query.toLowerCase())
+    option.toLowerCase().includes(query?.toLowerCase())
   );
 
   return (
@@ -36,8 +36,8 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
           />
         )}
       </div>
-      {filteredOptions.length > 4 && (
-        <ul className="bg-zinc-500 mt-3 rounded-lg max-h-40 overflow-auto">
+      {filteredOptions.slice(0, 3).length > 0 && (
+        <ul className="bg-zinc-700 mt-3 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
@@ -45,7 +45,7 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
                 onSelect(option);
                 setQuery(option); // Set the selected product as the query
               }}
-              className="p-2 cursor-pointer hover:bg-blue-500 hover:text-black hover:font-bold text-lg"
+              className="p-2 cursor-pointer hover:bg-yellow-500 hover:text-black hover:font-bold text-lg"
             >
               {option}
             </li>
@@ -58,8 +58,8 @@ const ProductSearch = ({ options, onSelect, onClear, selectedValue }) => {
         </p>
       )}
       {/* Show more button */}
-      {filteredOptions.length > 1 && (
-          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto hover:bg-blue-500">
+      {filteredOptions.length > 4 && !selectedValue && (
+          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto bg-blue-500">
             <button
               className="text-white underline hover:text-black"
               onClick={() => setShowModal(true)}

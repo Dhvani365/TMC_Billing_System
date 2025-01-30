@@ -16,8 +16,10 @@ const Modal = ({ title, items, onSelect, onClose }) => {
   };
 
   let filteredItems = items.filter((item) =>
-    item.toLowerCase().includes(search.toLowerCase())
-  );
+    (item.catalog_name || item)
+      ?.toLowerCase()
+      .includes(search?.toLowerCase())
+  );  
 
   if (!filteredItems.length && !search) {
     filteredItems = items;
@@ -25,7 +27,7 @@ const Modal = ({ title, items, onSelect, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-35 z-50">
-      <div className="bg-black rounded-md p-6 w-3/4 max-h-[90%] overflow-y-auto">
+      <div className="bg-black rounded-md p-6 w-2/4 max-h-[90%] overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-2xl font-bold">{title}</h2>
           <button onClick={onClose} className="text-red-600 font-bold pr-[1%]">
@@ -53,7 +55,7 @@ const Modal = ({ title, items, onSelect, onClose }) => {
                   onClick={() => handleOnClose(item)} // Ensure this triggers the close and select item logic
                   className="pl-10 py-3 cursor-pointer hover:bg-blue-500 hover:text-black font-bold"
                 >
-                  {item}
+                  {item.catalog_name || item}
                 </li>
               ))}
             </ul>
