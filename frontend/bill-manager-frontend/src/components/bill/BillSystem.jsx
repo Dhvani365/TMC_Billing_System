@@ -18,7 +18,7 @@ const BillSystem = () => {
   const [selectedBill, setSelectedBill] = useState(null);
 
   // Mock data
-  const catalogs = ["Electronics", "Clothing", "Furniture","hellp"];
+  const catalogs = ["Electronics", "Clothing", "Furniture","hello1","Hello2",,"hello1","Hello2","hello1","Hello2"];
   const products = {
     Electronics: [
       { name: "Laptop", price: 1000 },
@@ -107,17 +107,17 @@ const BillSystem = () => {
   };
 
   return (
-    <div className="flex-grow h-full bg-[#011627] text-[#FDFFFC] flex">
+    <div className="flex-grow h-full bg-zinc-700 text-[#FDFFFC] flex">
       {/* Left Section: Selection Area */}
-      <div className="w-2/5 p-6 border-r-2 border-[#F6AE2D] grid grid-cols-2 grid-rows-2 gap-4">
-        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
-        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-2 mb-2">
+      <div className="w-2/5 p-3 border-r-2 border-[#F6AE2D] grid grid-cols-2 grid-rows-2 gap-4">
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
         <img
             src="src/Logo/Catalog.png"
             alt="Catalog Logo"
             className="w-8 h-8 mr-2"
           />
-          <h3 className="text-2xl text-white font-bold">Catalogs</h3>
+          <h3 className="text-xl text-white font-bold">Catalogs</h3>
           </div>
           {/* Catalog Search */}
           <CatalogSearch
@@ -144,14 +144,56 @@ const BillSystem = () => {
           
         </div>
 
-        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
-        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-2 mb-2">
+
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
+        <img
+            src="src/Logo/Party.png"
+            alt="Party Logo"
+            className="w-8 h-8 mr-2"
+          />
+          <h3 className="text-xl text-white font-bold">Party</h3>
+          </div>
+          {/* Party Search */}
+          {product ? (
+            <>
+              <PartySearch
+                options={parties}
+                onSelect={handlePartySelect}
+                onClear={() => handlePartySelect("")}
+                selectedValue={party}
+              />
+              {/* Recent Parties */}
+              {/* <div className="mt-4">
+                <h3 className="text-lg font-bold mb-2">Recent Parties</h3>
+                <div className="flex flex-wrap gap-2">
+                  {recentParties.map((item, index) => (
+                    <span
+                      key={index}
+                      onClick={() => handlePartySelect(item)}
+                      className="cursor-pointer hover:text-[#FCFFFD] hover:bg-[#F6AE2D] px-3 py-1 border border-[#F6AE2D] rounded-full"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div> */}
+            </>
+          ) : (
+            <div className="flex justify-center items-center h-full">
+              <p className="text-center text-[#F6AE2D] text-xl">Select a product first</p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
         <img
             src="src/Logo/Product.png"
             alt="Product Logo"
             className="w-8 h-8 mr-2 bg-white rounded-full"
           />
-          <h3 className="text-2xl text-white font-bold">Products</h3>
+          <h3 className="text-xl text-white font-bold">Products</h3>
           </div>
           {/* Product Search */}
           {catalog ? (
@@ -189,55 +231,14 @@ const BillSystem = () => {
           )}
         </div>
 
-        <div className="border-2 border-[#F6AE2D] bg-[#011627] p-4 rounded-lg flex flex-col justify-between">
-        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-2 mb-2">
-        <img
-            src="src/Logo/Party.png"
-            alt="Party Logo"
-            className="w-8 h-8 mr-2"
-          />
-          <h3 className="text-2xl text-white font-bold">Party</h3>
-          </div>
-          {/* Party Search */}
-          {product ? (
-            <>
-              <PartySearch
-                options={parties}
-                onSelect={handlePartySelect}
-                onClear={() => handlePartySelect("")}
-                selectedValue={party}
-              />
-              {/* Recent Parties */}
-              {/* <div className="mt-4">
-                <h3 className="text-lg font-bold mb-2">Recent Parties</h3>
-                <div className="flex flex-wrap gap-2">
-                  {recentParties.map((item, index) => (
-                    <span
-                      key={index}
-                      onClick={() => handlePartySelect(item)}
-                      className="cursor-pointer hover:text-[#FCFFFD] hover:bg-[#F6AE2D] px-3 py-1 border border-[#F6AE2D] rounded-full"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div> */}
-            </>
-          ) : (
-            <div className="flex justify-center items-center h-full">
-              <p className="text-center text-[#F6AE2D] text-xl">Select a product first</p>
-            </div>
-          )}
-        </div>
-
-        <div className="border-2 bg-[#011627] border-[#F6AE2D] p-4 rounded-lg flex flex-col justify-between">
-        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-2 mb-2">
+        <div className="bg-black p-3 rounded-md flex flex-col">
+        <div className="flex items-center border-b-2 border-[#F6AE2D] pb-1 mb-2">
         <img
             src="src/Logo/Sale.png"
             alt="Sale Logo"
             className="w-8 h-8 mr-2 bg-white rounded-full"
           />
-          <h3 className="text-2xl text-white font-bold">Pricing</h3>
+          <h3 className="text-xl text-white font-bold">Pricing</h3>
           </div>
           {/* Pricing Selector and Quantity Input */}
           {party ? (
@@ -250,7 +251,7 @@ const BillSystem = () => {
               {/* Add Product Button */}
               <button
                 onClick={addProductToBill}
-                className="w-full mt-4 bg-[#F6AE2D] text-[#011627] py-2 rounded-xl hover:bg-opacity-90 transition"
+                className="w-full mt-4 bg-[#F6AE2D] text-black py-2 rounded-md hover:bg-blue-500 hover:font-bold"
               >
                 Add Product
               </button>

@@ -7,7 +7,7 @@ const QuantityInput = ({ quantity, setQuantity }) => {
           min="1"
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value))}
-          className="w-full p-2 rounded-lg bg-[#011627] border border-[#F6AE2D]"
+          className="w-full p-2 rounded-md bg-zinc-800"
         />
       </div>
     );

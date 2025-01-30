@@ -23,12 +23,12 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
           placeholder="Search Catalog..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full p-2 pl-10 pr-10 rounded-lg bg-[#011627] border border-[#F6AE2D]"
+          className="w-full p-2 pl-10 pr-5 rounded-lg bg-zinc-800"
         />
         <FaSearch className="absolute left-3 top-3 text-[#F6AE2D]" />
         {query && (
           <FaTimes
-            className="absolute right-3 top-3 text-[#F6AE2D] cursor-pointer"
+            className="absolute right-3 top-2 text-[#F6AE2D] cursor-pointer"
             onClick={() => {
               setQuery("");
               onClear();
@@ -37,7 +37,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
         )}
       </div>
       {filteredOptions.length > 0 && (
-        <ul className="bg-[#0a2438] border border-[#F6AE2D] mt-2 rounded-lg max-h-40 overflow-auto">
+        <ul className="bg-zinc-500 mt-3 rounded-lg max-h-40 overflow-auto">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
@@ -45,7 +45,7 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
                 onSelect(option);
                 setQuery(option); // Set the selected catalog as the query
               }}
-              className="p-2 cursor-pointer hover:bg-[#F6AE2D]"
+              className="p-2 cursor-pointer hover:bg-blue-500 hover:text-black hover:font-bold text-lg"
             >
               {option}
             </li>
@@ -60,9 +60,9 @@ const CatalogSearch = ({ options, onSelect, onClear, selectedValue }) => {
 
       {/* Show more button */}
       {filteredOptions.length > 4 && (
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-3 bg-zinc-600 pt-2 pb-2 rounded-md w-[70%] mx-auto hover:bg-blue-500">
             <button
-              className="text-white underline hover:text-yellow-500"
+              className="text-white underline hover:text-black"
               onClick={() => setShowModal(true)}
             >
               Show More...

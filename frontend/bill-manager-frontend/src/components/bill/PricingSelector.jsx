@@ -5,7 +5,7 @@ const PricingSelector = ({ pricingType, setPricingType }) => {
         <select
           onChange={(e) => setPricingType(e.target.value)}
           value={pricingType}
-          className="w-full p-2 rounded-lg bg-[#011627] border border-[#F6AE2D]"
+          className="w-full p-2 rounded-md bg-zinc-800 "
         >
           <option value="Normal">Normal</option>
           <option value="Wholesale">Wholesale</option>
