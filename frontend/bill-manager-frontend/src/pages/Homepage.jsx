@@ -1,14 +1,18 @@
-import Navbar from '../components/Navbar';
-import BillSystem from '../components/BillSystem';
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import OrderPanel from "@/components/OrderPanel";
+import PaymentOptions from "@/components/PaymentOptions";
 
 const Homepage = () => {
   return (
-    <div className="h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-grow h-full">
-        <BillSystem />
+    <div className="flex flex-col h-screen">
+        <Header />
+        <div className="flex flex-1">
+          <Sidebar />
+          <OrderPanel />
+          <PaymentOptions />
+        </div>
       </div>
-    </div>
   );
 };
 

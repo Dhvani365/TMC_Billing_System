@@ -1,16 +1,13 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import  Homepage  from './pages/Homepage'
-import Layout from './Layout'
+import React from "react";
+import { Provider } from "react-redux";
+import store from "./store/store";
+import Homepage from "./pages/Homepage";
 
 const App = () => {
   return (
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-          </Routes>
-        </Layout>
-    </Router>
+    <Provider store={store}>
+      <Homepage />
+    </Provider>
   );
 };
 
