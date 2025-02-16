@@ -4,7 +4,9 @@ import orderReducer from "./orderSlice";
 import paymentReducer from "./paymentSlice";
 import clientReducer from "./clientSlice";
 import catalogReducer from "./catalogSlice";
-
+import brandReducer from "./brandSlice";
+import billReducer from './billSlice';
+  
 const store = configureStore({
   reducer: {
     menu: menuReducer,
@@ -12,6 +14,8 @@ const store = configureStore({
     payment: paymentReducer,
     client: clientReducer,
     catalog: catalogReducer,
+    brand: brandReducer,
+    bill: billReducer
   },
 });
 

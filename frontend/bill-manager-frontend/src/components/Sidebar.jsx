@@ -1,46 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Separator } from "@radix-ui/react-separator";
-import { setSelectedCatalog } from "@/store/catalogSlice";
+import { setSelectedBrand } from "@/store/brandSlice";
 
 const Sidebar = () => {
   const selectedClient = useSelector((state) => state.client.selectedClient);
-  const clientCatalogs = useSelector((state) => state.client.clientCatalogs);
-  const categories = selectedClient ? clientCatalogs[selectedClient] || [] : [];
+  const clientBrands = useSelector((state) => state.client.clientBrands);
+  const brands = selectedClient ? clientBrands[selectedClient] || [] : [];
 
-  const [activeCategory, setActiveCategory] = useState("");
+  const [activebrand, setActivebrand] = useState("");
   const dispatch = useDispatch();
 
-  // Update activeCategory when categories change
+  // Update activebrand when brands change
   useEffect(() => {
-    if (categories.length > 0) {
-      setActiveCategory(categories[0]); // Set first category as active
+    if (brands.length > 0) {
+      setActivebrand(brands[0]); // Set first brand as active
     } else {
-      setActiveCategory(""); // Reset if no categories exist
+      setActivebrand(""); // Reset if no brands exist
     }
-  }, [categories]);
+  }, [brands]);
 
   return (
     <aside className="w-[15%] bg-[#EEEEEE] h-screen p-2 shadow-md">
-      <h2 className="text-lg font-bold text-gray-700 mb-4 mt-2">Catalogs</h2>
+      <h2 className="text-lg font-bold text-gray-700 mb-4 mt-2">Brands</h2>
 
       {selectedClient ? (
         <ul>
           <Separator className="bg-gray-700 w-full h-px my-2" />
-          {categories.map((category, index) => (
+          {brands.map((brand, index) => (
             <React.Fragment key={index}>
               <li
                 className={`p-3 rounded-md cursor-pointer transition ${
-                  activeCategory === category
+                  activebrand === brand
                     ? "bg-gray-700 text-white"
                     : "hover:bg-gray-300"
                 }`}
                 onClick={() => {
-                  dispatch(setSelectedCatalog(category))
-                  setActiveCategory(category);
+                  dispatch(setSelectedBrand(brand))
+                  setActivebrand(brand);
                 }}
               >
-                {category}
+                {brand}
               </li>
               <Separator className="bg-gray-700 w-full h-px my-2" />
             </React.Fragment>

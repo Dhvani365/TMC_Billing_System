@@ -2,12 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   selectedClient: null,
-  clientCatalogs: {
-    "Dhvani Maktuporia": ["Electronics", "Home Appliances", "Fashion"],
-    "Devanshu Mangal": ["Groceries", "Fruits & Vegetables", "Dairy"],
-    "Deep Gadhiya": ["Books", "Stationery", "Office Supplies"],
-    "Kuldeep Kevat": ["Sports Equipment", "Fitness", "Outdoor"],
-    "Malhar Mangtani": ["Beauty", "Skincare", "Haircare"],
+  clientBrands: {
+    "Dhvani Maktuporia": ["BMW", "Apple Reso", "Toyota"],
+    "Devanshu Mangal": ["Toyota", "Tata", "Apple Reso"],
+    "Deep Gadhiya": ["Apple Reso", "Mercedes-Benz", "Toyota"],
+    "Kuldeep Kevat": ["Apple Reso", "BMW", "Jeep"],
+    "Malhar Mangtani": ["Apple Reso", "Mercedes-Benz", "BMW"],
   },
 };
 
