@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToBill } from "@/store/billSlice"; 
 import { HiArrowSmallLeft } from "react-icons/hi2";
@@ -16,6 +16,13 @@ const OrderPanel = () => {
 
   const catalogs = selectedBrand ? brandCatalogs[selectedBrand] || [] : [];
   const products = selectedCatalog ? catalogProducts[selectedCatalog] || [] : [];
+
+  // Reset catalog, product, and price type when the brand changes
+  useEffect(() => {
+    setSelectedCatalog(null);
+    setSelectedProduct(null);
+    setSelectedPriceType("");
+  }, [selectedBrand]);
 
   const handleAddProduct = () => {
     if (!selectedProduct) {

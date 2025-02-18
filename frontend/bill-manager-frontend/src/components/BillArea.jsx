@@ -17,18 +17,28 @@ const BillArea = ({ onSave }) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-[#F6AE2D]">Bill Details</h2>
+        <h2 className="text-xl font-bold text-black">Bill Details</h2>
         <div className="flex space-x-2">
-          <button onClick={() => onSave(bill)} className="text-blue-500 hover:text-blue-700">
-            <FaSave size={20} />
-          </button>
-          <button onClick={() => dispatch(resetBill())} className="text-red-500 hover:text-red-700">
-            <FaRedo size={20} />
-          </button>
-          <button onClick={() => window.print()} className="text-green-500 hover:text-green-700">
-            <FaPrint size={20} />
-          </button>
-        </div>
+  <button
+    onClick={() => onSave(bill)}
+    className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+  >
+    Save
+  </button>
+  <button
+    onClick={() => dispatch(resetBill())}
+    className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+  >
+    Reset
+  </button>
+  <button
+    onClick={() => window.print()}
+    className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+  >
+    Print
+  </button>
+</div>
+
       </div>
       <table border="5px" className="w-full">
         <thead>
