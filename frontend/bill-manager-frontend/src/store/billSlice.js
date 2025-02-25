@@ -1,6 +1,7 @@
+// src/store/billSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-const billSlice = createSlice({
+export const billSlice = createSlice({
   name: 'bill',
   initialState: {
     items: [],
@@ -15,8 +16,16 @@ const billSlice = createSlice({
     resetBill: (state) => {
       state.items = [];
     },
+    updateQuantity: (state, action) => {
+      const { id, quantity } = action.payload;
+      const item = state.items.find(item => item.id === id);
+      if (item) {
+        item.quantity = quantity;
+        item.total = item.quantity * item.price - item.discount; // Recalculate total
+      }
+    }
   },
 });
 
-export const { addToBill, removeFromBill, resetBill } = billSlice.actions;
+export const { addToBill, removeFromBill, resetBill, updateQuantity } = billSlice.actions;
 export default billSlice.reducer;
