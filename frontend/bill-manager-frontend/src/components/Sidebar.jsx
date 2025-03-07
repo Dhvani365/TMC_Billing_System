@@ -39,7 +39,7 @@ const Sidebar = () => {
   }, [selectedClient]);
 
   return (
-    <aside className="w-[15%] bg-[#EEEEEE] h-screen p-2 shadow-md">
+    <aside className="w-[10%] bg-[#EEEEEE] h-screen p-2 shadow-md">
       <h2 className="text-lg font-bold text-gray-700 mb-4 mt-2">Brands</h2>
 
       {selectedClient ? (

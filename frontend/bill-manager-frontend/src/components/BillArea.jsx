@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromBill, resetBill, updateQuantity } from '@/store/billSlice';
 import { FaTimes } from 'react-icons/fa';
+import { Separator } from "@radix-ui/react-separator";
 
 const BillArea = ({ onSave }) => {
   const dispatch = useDispatch();
@@ -15,12 +16,17 @@ const BillArea = ({ onSave }) => {
   const currentItems = bill.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Handle quantity change and dispatch the update action
-  const handleQuantityChange = (itemId, newQuantity) => {
+const handleQuantityChange = (itemId, newQuantity) => {
+  // If input is empty, we treat the quantity as 0
+  if (newQuantity === '') {
+    dispatch(updateQuantity({ id: itemId, quantity: '-' }));
+  } else {
     const quantity = parseInt(newQuantity);
-    if (quantity > 0) {
+    if (!isNaN(quantity) && quantity > 0) {
       dispatch(updateQuantity({ id: itemId, quantity }));
     }
-  };
+  }
+};
 
   return (
     <div className="flex flex-col space-y-4 p-4 bg-white rounded-md shadow-md">
@@ -36,9 +42,10 @@ const BillArea = ({ onSave }) => {
               <th>Price</th>
               <th>Discounted Price</th>
               <th>Total</th>
+              <th></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className='text-center'>
             {currentItems.map((item, index) => (
               <tr key={item.id}>
                 <td>{index + 1}</td>
@@ -46,7 +53,7 @@ const BillArea = ({ onSave }) => {
                 <td>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     value={item.quantity}
                     onChange={(e) => handleQuantityChange(item.id, e.target.value)}
                     className="w-16 border border-gray-300 rounded px-2"
@@ -66,33 +73,41 @@ const BillArea = ({ onSave }) => {
         </table>
       </div>
 
-      {/* Display Total Amount */}
-      <hr/>
-      <div className="text-right text-md font-semibold mb-6">
+      {/* Fixed container for Total Amount, Separator, and Buttons */}
+      <div className="absolute top-[55%] w-[100%] bg-white">
+
+      {/* Right-aligned Total Amount */}
+      <div className="text-right text-lg font-semibold mb-2 pr-10 bg-zinc-200">
         <p>Total Amount: ₹{total.toFixed(2)}</p>
       </div>
 
-      {/* Fixed Buttons at the bottom of Bill Area */}
-      <div className="flex bottom-0 bg-white py-2 flex justify-end space-x-2 border-t border-gray-300">
+      {/* Separator */}
+      <Separator className="bg-gray-700 w-full h-px my-2" />
+
+      {/* Left-aligned Buttons */}
+      <div className="flex justify-center space-x-20">
         <button
           onClick={() => onSave(bill)}
-          className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+          className="text-blue-400 hover:bg-blue-500 hover:text-white px-5 py-2 border border-blue-400 rounded-sm"
         >
           Save
         </button>
         <button
           onClick={() => dispatch(resetBill())}
-          className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+          className="text-blue-400 hover:bg-blue-500 hover:text-white px-5 py-2 border border-blue-400 rounded-sm"
         >
           Reset
         </button>
         <button
           onClick={() => window.print()}
-          className="text-blue-400 hover:bg-blue-400 hover:text-white px-5 py-2 border border-blue-400 rounded-md"
+          className="text-blue-400 hover:bg-blue-500 hover:text-white px-5 py-2 border border-blue-400 rounded-sm"
         >
           Print
         </button>
       </div>
+      </div>
+
+
     </div>
   );
 };

@@ -73,7 +73,7 @@ const OrderPanel = () => {
   };
 
   return (
-    <div className="w-[80%] p-4 bg-gray-100">
+    <div className="w-[50%] p-4 bg-gray-100">
       <h2 className="text-lg font-bold mb-4">Order Panel</h2>
 
       {!selectedBrand && (
