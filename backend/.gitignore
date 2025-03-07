@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -21,4 +22,5 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+D:\tmc\taskmanager_tmc\backend\node_modules
+taskmanager_tmc/backend/.env

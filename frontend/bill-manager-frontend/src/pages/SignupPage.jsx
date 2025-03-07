@@ -18,7 +18,7 @@ const SignupPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/signup', formData, { withCredentials: true });
       console.log('Signup successful:', response.data);
-      navigate('/login'); // Redirect to LoginPage on successful signup
+      navigate('/'); // Redirect to LoginPage on successful signup
     } catch (error) {
       console.error('Error during signup:', error.response?.data || error.message);
       setError(error.response?.data?.message || 'Signup failed. Please try again.');
@@ -38,7 +38,7 @@ const SignupPage = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your name"
             />
           </div>
@@ -49,7 +49,7 @@ const SignupPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your email"
             />
           </div>
@@ -60,16 +60,22 @@ const SignupPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your password"
             />
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             Sign Up
           </button>
+          <div className="text-center mt-4">
+            Already a User?{' '}
+            <a href="/" className="text-green-900 hover:underline">
+              Login
+            </a>
+          </div>
         </form>
       </div>
     </div>

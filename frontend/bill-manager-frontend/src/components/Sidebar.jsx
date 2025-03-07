@@ -2,23 +2,41 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Separator } from "@radix-ui/react-separator";
 import { setSelectedBrand } from "@/store/brandSlice";
+import axios from 'axios';
 
 const Sidebar = () => {
   const selectedClient = useSelector((state) => state.client.selectedClient);
-  const clientBrands = useSelector((state) => state.client.clientBrands);
-  const brands = selectedClient ? clientBrands[selectedClient] || [] : [];
-
-  const [activebrand, setActivebrand] = useState("");
+  const [brands, setBrands] = useState([]);
+  const [activeBrand, setactiveBrand] = useState("");
   const dispatch = useDispatch();
 
-  // Update activebrand when brands change
+  // Update activeBrand when brands change
   useEffect(() => {
     if (brands.length > 0) {
-      setActivebrand(brands[0]); // Set first brand as active
+      setactiveBrand(brands[0]); // Set first brand as active
     } else {
-      setActivebrand(""); // Reset if no brands exist
+      setactiveBrand(""); // Reset if no brands exist
     }
   }, [brands]);
+  
+  useEffect(() => {
+    const fetchBrands = async () => {
+      if (selectedClient) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/partyBrand/selected_brands/${selectedClient._id}`);
+          console.log("==>", response);
+          setBrands(response.data || []); // Ensure brands is always an array
+        } catch (error) {
+          console.error("Error fetching brands:", error);
+          setBrands([]); // Set brands to an empty array on error
+        }
+      } else {
+        setBrands([]);
+      }
+    };
+
+    fetchBrands();
+  }, [selectedClient]);
 
   return (
     <aside className="w-[15%] bg-[#EEEEEE] h-screen p-2 shadow-md">
@@ -31,13 +49,13 @@ const Sidebar = () => {
             <React.Fragment key={index}>
               <li
                 className={`p-3 rounded-md cursor-pointer transition ${
-                  activebrand === brand
+                  activeBrand === brand
                     ? "bg-gray-700 text-white"
                     : "hover:bg-gray-300"
                 }`}
                 onClick={() => {
                   dispatch(setSelectedBrand(brand))
-                  setActivebrand(brand);
+                  setactiveBrand(brand);
                 }}
               >
                 {brand}
