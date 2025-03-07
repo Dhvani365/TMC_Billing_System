@@ -7,9 +7,9 @@ const OrderPanel = () => {
   const dispatch = useDispatch();
   
   const selectedBrand = useSelector((state) => state.brand.selectedBrand);
-  const brandCatalogs = useSelector((state) => state.brand.brandCatalogs);
   const catalogProducts = useSelector((state) => state.catalog.catalogProducts);
 
+  const [brandCatalogs, setBrandCatalogs] = useState({});
   const [selectedCatalog, setSelectedCatalog] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedPriceType, setSelectedPriceType] = useState("");
@@ -17,8 +17,24 @@ const OrderPanel = () => {
   const catalogs = selectedBrand ? brandCatalogs[selectedBrand] || [] : [];
   const products = selectedCatalog ? catalogProducts[selectedCatalog] || [] : [];
 
+  // Fetch catalogs from backend when the component mounts
+  useEffect(() => {
+    const fetchCatalogs = async () => {
+      try {
+        // const response = await fetch("https://localhost:3000/api/catalog");
+        const response = await axios.get(`http://localhost:3000/api/catalog`);
+        setBrandCatalogs(response.data);
+      } catch (error) {
+        console.error("Error fetching catalogs:", error);
+      }
+    };
+
+    fetchCatalogs();
+  }, []);
+
   // Reset catalog, product, and price type when the brand changes
   useEffect(() => {
+    console.log("====>", selectedBrand)
     setSelectedCatalog(null);
     setSelectedProduct(null);
     setSelectedPriceType("");
