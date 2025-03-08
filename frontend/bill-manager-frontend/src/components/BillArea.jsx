@@ -29,7 +29,8 @@ const BillArea = ({ onSave }) => {
 
   // Use defaultBill if Redux state is empty
   const bill = useSelector((state) => state.bill.items.length > 0 ? state.bill.items : defaultBill);
-
+  
+  // const bill = useSelector((state) => state.bill.items);
   const contentRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
