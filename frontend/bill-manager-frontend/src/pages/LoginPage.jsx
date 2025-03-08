@@ -22,14 +22,14 @@ const LoginPage = () => {
     setError(''); // Clear previous error message
 
     // Check for static credentials first
-    // if (formData.email === staticEmail && formData.password === staticPassword) {
-    //     localStorage.setItem("token", "dummy-token");
-    //     localStorage.setItem("username", "Test User");
-    //     localStorage.setItem("userid", "123456");
-    //     console.log('Static login successful');
-    //     navigate('/home'); // Redirect to Homepage after successful static login
-    //     return;
-    // }
+    if (formData.email === staticEmail && formData.password === staticPassword) {
+        localStorage.setItem("token", "dummy-token");
+        localStorage.setItem("username", "Test User");
+        localStorage.setItem("userid", "123456");
+        console.log('Static login successful');
+        navigate('/home'); // Redirect to Homepage after successful static login
+        return;
+    }
 
     try {
       const response = await axios.post('http://localhost:3000/api/auth/login', formData, { withCredentials: true });
