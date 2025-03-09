@@ -45,9 +45,9 @@ const Homepage = () => {
         <OrderPanel onAddProduct={addProductToBill} />
         
         {/* Middle Section: Bill Viewing Area */}
-        <div className="w-[70%] p-6 bg-[#FDFFFC]">
-          <BillArea bill={bill} onSave={handleSaveBill} />
-        </div>
+        {/* <div className="w-80% p-6 bg-[#FDFFFC]"> */}
+        <BillArea bill={bill} onSave={handleSaveBill} />
+        {/* </div> */}
 
         {/* Right Section: Bill Manager Area */}
         {/* <div className="w-1/5 p-6 bg-[#FDFFFC] border-l-2 border-[#F6AE2D] text-[#011627]">

@@ -17,6 +17,25 @@ const Sidebar = () => {
       setActiveBrand(null); // Reset if no brands exist
     }
   }, [brands]);
+  
+  useEffect(() => {
+    const fetchBrands = async () => {
+      if (selectedClient) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/partyBrand/selected_brands/${selectedClient._id}`);
+          console.log("==>", response);
+          setBrands(response.data || []); // Ensure brands is always an array
+        } catch (error) {
+          console.error("Error fetching brands:", error);
+          setBrands([]); // Set brands to an empty array on error
+        }
+      } else {
+        setBrands([]);
+      }
+    };
+
+    fetchBrands();
+  }, [selectedClient]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -39,7 +58,7 @@ const Sidebar = () => {
   }, [selectedClient]);
 
   return (
-    <aside className="w-[15%] bg-[#EEEEEE] h-screen p-2 shadow-md">
+    <aside className="w-[10%] bg-[#EEEEEE] h-screen p-2 shadow-md">
       <h2 className="text-lg font-bold text-gray-700 mb-4 mt-2">Brands</h2>
 
       {selectedClient ? (
