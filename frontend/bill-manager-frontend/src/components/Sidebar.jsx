@@ -2,23 +2,41 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Separator } from "@radix-ui/react-separator";
 import { setSelectedBrand } from "@/store/brandSlice";
+import axios from "axios";
 
 const Sidebar = () => {
   const selectedClient = useSelector((state) => state.client.selectedClient);
-  const clientBrands = useSelector((state) => state.client.clientBrands);
-  const brands = selectedClient ? clientBrands[selectedClient] || [] : [];
-
-  const [activebrand, setActivebrand] = useState("");
+  const [brands, setBrands] = useState([]);
+  const [activeBrand, setActiveBrand] = useState(null);
   const dispatch = useDispatch();
 
-  // Update activebrand when brands change
   useEffect(() => {
     if (brands.length > 0) {
-      setActivebrand(brands[0]); // Set first brand as active
+      setActiveBrand(brands[0]); // Set first brand as active
     } else {
-      setActivebrand(""); // Reset if no brands exist
+      setActiveBrand(null); // Reset if no brands exist
     }
   }, [brands]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      if (selectedClient) {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/partyBrand/${selectedClient._id}`);
+          console.log("Fetched brands:", response.data);
+          const extractedBrands = response.data.map((item) => item.brand); // Extract brand objects
+          setBrands(extractedBrands);
+        } catch (error) {
+          console.error("Error fetching brands:", error);
+          setBrands([]);
+        }
+      } else {
+        setBrands([]);
+      }
+    };
+
+    fetchBrands();
+  }, [selectedClient]);
 
   return (
     <aside className="w-[15%] bg-[#EEEEEE] h-screen p-2 shadow-md">
@@ -27,20 +45,18 @@ const Sidebar = () => {
       {selectedClient ? (
         <ul>
           <Separator className="bg-gray-700 w-full h-px my-2" />
-          {brands.map((brand, index) => (
-            <React.Fragment key={index}>
+          {brands.map((brand) => (
+            <React.Fragment key={brand._id}>
               <li
                 className={`p-3 rounded-md cursor-pointer transition ${
-                  activebrand === brand
-                    ? "bg-gray-700 text-white"
-                    : "hover:bg-gray-300"
+                  activeBrand?._id === brand._id ? "bg-gray-700 text-white" : "hover:bg-gray-300"
                 }`}
                 onClick={() => {
-                  dispatch(setSelectedBrand(brand))
-                  setActivebrand(brand);
+                  dispatch(setSelectedBrand({ _id: brand._id, name: brand.name }));
+                  setActiveBrand(brand);
                 }}
               >
-                {brand}
+                {brand.name}
               </li>
               <Separator className="bg-gray-700 w-full h-px my-2" />
             </React.Fragment>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Brand</title>
+</head>
+<body>
+    <h2>Add a New Brand</h2>
+    <form action="http://localhost:3000/api/brand/add" method="POST" enctype="multipart/form-data">
+        <label for="name">Brand Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br><br>
+        <label for="image">Brand Logo (optional):</label>
+        <input type="file" id="image" name="image">
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

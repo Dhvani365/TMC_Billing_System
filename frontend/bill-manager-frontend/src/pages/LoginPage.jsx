@@ -22,14 +22,14 @@ const LoginPage = () => {
     setError(''); // Clear previous error message
 
     // Check for static credentials first
-    if (formData.email === staticEmail && formData.password === staticPassword) {
-        localStorage.setItem("token", "dummy-token");
-        localStorage.setItem("username", "Test User");
-        localStorage.setItem("userid", "123456");
-        console.log('Static login successful');
-        navigate('/home'); // Redirect to Homepage after successful static login
-        return;
-    }
+    // if (formData.email === staticEmail && formData.password === staticPassword) {
+    //     localStorage.setItem("token", "dummy-token");
+    //     localStorage.setItem("username", "Test User");
+    //     localStorage.setItem("userid", "123456");
+    //     console.log('Static login successful');
+    //     navigate('/home'); // Redirect to Homepage after successful static login
+    //     return;
+    // }
 
     try {
       const response = await axios.post('http://localhost:3000/api/auth/login', formData, { withCredentials: true });
@@ -58,7 +58,7 @@ const LoginPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your email"
             />
           </div>
@@ -69,14 +69,14 @@ const LoginPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Enter your password"
             />
           </div>
           <div className='text-center'>
             <button
               type="submit"
-              className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               Login
             </button>
@@ -84,7 +84,7 @@ const LoginPage = () => {
         </form>
         <div className="text-center mt-4">
           New User?{' '}
-          <a href="/signup" className="text-blue-500 hover:underline">
+          <a href="/signup" className="text-green-900 hover:underline">
             Sign Up
           </a>
         </div>

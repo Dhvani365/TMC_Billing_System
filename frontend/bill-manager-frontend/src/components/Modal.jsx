@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setSelectedClient } from "../store/clientSlice";
 
 const Modal = ({ isOpen, onClose, title, searchPlaceholder, items, searchValue, onSearchChange }) => {
   const dispatch = useDispatch();
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    setClients(items);
+  }, [items]);
 
   if (!isOpen) return null;
 
@@ -31,18 +36,18 @@ const Modal = ({ isOpen, onClose, title, searchPlaceholder, items, searchValue, 
 
         {/* Client List */}
         <ul className="mt-4 max-h-40 overflow-y-auto">
-          {items
-            .filter((item) => item.toLowerCase().includes(searchValue.toLowerCase()))
-            .map((item, index) => (
+          {clients
+            .filter((client) => client.name.toLowerCase().includes(searchValue.toLowerCase()))
+            .map((client) => (
               <li
-                key={index}
+                key={client._id}
                 className="p-2 cursor-pointer hover:bg-gray-200 rounded-md"
                 onClick={() => {
-                  dispatch(setSelectedClient(item)); // Dispatch selected client
+                  dispatch(setSelectedClient(client)); // Dispatch selected client ID
                   onClose();
                 }}
               >
-                {item}
+                {client.name}
               </li>
             ))}
         </ul>
