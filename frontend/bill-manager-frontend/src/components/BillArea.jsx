@@ -1,14 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromBill, resetBill, updateQuantity } from '@/store/billSlice';
+import { removeFromBill, resetBill, updateQuantity, updateDiscountedPrice } from '@/store/billSlice';
 import { FaTimes } from 'react-icons/fa';
 import { Separator } from "@radix-ui/react-separator";
 import './BillArea.css';
+
 const BillArea = () => {
   const dispatch = useDispatch();
-
-  // Use defaultBill if Redux state is empty
-  // const bill = useSelector(state.bill.items);
   const bill = useSelector((state) => state.bill.items);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -22,6 +20,13 @@ const BillArea = () => {
     const numericQuantity = parseInt(newQuantity);
     if (!isNaN(numericQuantity) && numericQuantity >= 0) {
       dispatch(updateQuantity({ id: itemId, quantity: numericQuantity }));
+    }
+  };
+
+  const handleDiscountedPriceChange = (itemId, newDiscountedPrice) => {
+    const numericDiscountedPrice = parseFloat(newDiscountedPrice);
+    if (!isNaN(numericDiscountedPrice) && numericDiscountedPrice >= 0) {
+      dispatch(updateDiscountedPrice({ id: itemId, discountedPrice: numericDiscountedPrice }));
     }
   };
 
@@ -59,7 +64,7 @@ const BillArea = () => {
               <th className='border border-gray-800'>Price</th>
               <th className='border border-gray-800'>Discounted Price</th>  
               <th className='border border-gray-800'>Total</th>   
-              <th></th>             
+              <th className='border border-gray-800'>Actions</th>        
             </tr>
           </thead>
           <tbody className="text-center border border-gray-800 divide-y divide-gray-800 rounded-md">
@@ -95,7 +100,19 @@ const BillArea = () => {
                   </div>
                 </td>
                 <td className='border border-gray-800'>₹{item.price}</td>
-                <td className='border border-gray-800'>₹{item.discountedPrice}</td>
+                <td className='border border-gray-800'>
+                  <input
+                    type="text"
+                    value={item.discountedPrice}
+                    onChange={(e) => handleDiscountedPriceChange(item.id, e.target.value)}
+                    className="w-20 text-center border border-gray-300"
+                    onKeyPress={(e) => {
+                      if (!/[0-9.]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </td>
                 <td className='border border-gray-800'>₹{item.total}</td>
                 <td className='border border-gray-800'>
                   <button onClick={() => dispatch(removeFromBill(item.id))}>

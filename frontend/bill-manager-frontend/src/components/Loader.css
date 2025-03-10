@@ -1,0 +1,26 @@
+/* styles.css */
+.loader {
+    border: 12px solid #919191; /* Light grey */
+    border-top: 12px solid #133301; /* Blue */
+    border-bottom: 12px solid #133301;
+    border-radius: 15%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); border-radius: 20%; }
+    25% { border-radius: 30%; }
+    50% { border-radius: 40%;  }
+    75% { border-radius: 50%; }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
