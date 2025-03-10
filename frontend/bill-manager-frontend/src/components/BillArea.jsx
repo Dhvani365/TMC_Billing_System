@@ -3,42 +3,20 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeFromBill, resetBill, updateQuantity } from '@/store/billSlice';
 import { FaTimes } from 'react-icons/fa';
 import { Separator } from "@radix-ui/react-separator";
-
-const BillArea = ({ onSave }) => {
+import './BillArea.css';
+const BillArea = () => {
   const dispatch = useDispatch();
 
-  // Default static bill item
-  const defaultBill = [
-    {
-      id: 1,
-      product: 'Example Product 1',
-      quantity: 10,
-      price: 100.0,
-      discount: 10.0,
-      total: 90.0,
-    },
-    {
-      id: 2,
-      product: 'Example Product 2',
-      quantity: 12,
-      price: 100.0,
-      discount: 20.0,
-      total: 80.0,
-    },
-  ];
-
   // Use defaultBill if Redux state is empty
-  const bill = useSelector((state) => state.bill.items.length > 0 ? state.bill.items : defaultBill);
-  
-  // const bill = useSelector((state) => state.bill.items);
-  const contentRef = useRef(null);
+  // const bill = useSelector(state.bill.items);
+  const bill = useSelector((state) => state.bill.items);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
   const total = bill.reduce((acc, item) => acc + parseFloat(item.total), 0);
   const totalPages = Math.ceil(bill.length / itemsPerPage);
   const currentItems = bill.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
- 
+  
   // Handle quantity change and dispatch the update action
   const handleQuantityChange = (itemId, newQuantity) => {
     const numericQuantity = parseInt(newQuantity);
@@ -48,7 +26,7 @@ const BillArea = ({ onSave }) => {
   };
 
   const handleDecrease = (itemId, currentQuantity) => {
-    if (currentQuantity > 0) {
+    if (currentQuantity > 1) {
       dispatch(updateQuantity({ id: itemId, quantity: currentQuantity - 1 }));
     }
   };
@@ -57,29 +35,39 @@ const BillArea = ({ onSave }) => {
     dispatch(updateQuantity({ id: itemId, quantity: currentQuantity + 1 }));
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleSave = (bill) => {
+    // Implement your save logic here
+    alert("Bill saved successfully"); 
+  }
+
   return (
-    <div className="w-[50%] p-5 m-3 bg-zinc-100 rounded-xl shadow-sm flex flex-col justify-between h-[600px]">
+    <div className="w-[50%] p-5 m-3 bg-zinc-100 rounded-xl shadow-sm flex flex-col justify-between h-[85%] printableArea">
       <h2 className="text-xl font-bold text-black mb-2">Bill Details</h2>
 
       {/* Scrollable Table */}
       <div className="overflow-auto flex-grow shadow-2xl">
         <table className="w-full">
           <thead>
-            <tr className="bg-blue-300 border border-gray-800 ">
-              <th>#</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Price Type</th>
-              <th>Discounted Price</th>              
+            <tr className="bg-green-300">
+              <th className='border border-gray-800'>#</th>
+              <th className='border border-gray-800'>Product Name</th>
+              <th className='border border-gray-800'>Quantity</th>
+              <th className='border border-gray-800'>Price</th>
+              <th className='border border-gray-800'>Discounted Price</th>  
+              <th className='border border-gray-800'>Total</th>   
+              <th></th>             
             </tr>
           </thead>
           <tbody className="text-center border border-gray-800 divide-y divide-gray-800 rounded-md">
             {currentItems.map((item, index) => (
               <tr key={item.id}>
-                <td>{index + 1}</td>
-                <td>{item.productName}</td>
-                <td>
+                <td className='border border-gray-800'>{index + 1}</td>
+                <td className='border border-gray-800'>{item.productName}</td>
+                <td className='border border-gray-800'>
                   <div className="flex items-center justify-center">
                     <button
                       onClick={() => handleDecrease(item.id, item.quantity)}
@@ -106,10 +94,10 @@ const BillArea = ({ onSave }) => {
                     </button>
                   </div>
                 </td>
-                <td>₹{item.price}</td>
-                <td>{item.priceType}</td>
-                <td>₹{item.discountedPrice}</td>
-                <td>
+                <td className='border border-gray-800'>₹{item.price}</td>
+                <td className='border border-gray-800'>₹{item.discountedPrice}</td>
+                <td className='border border-gray-800'>₹{item.total}</td>
+                <td className='border border-gray-800'>
                   <button onClick={() => dispatch(removeFromBill(item.id))}>
                     <FaTimes size={20} />
                   </button>
@@ -133,20 +121,20 @@ const BillArea = ({ onSave }) => {
         {/* Left-aligned Buttons */}
         <div className="flex justify-end space-x-10 p-3 bg-zinc-300 rounded-md shadow-xl">
           <button
-            onClick={() => onSave(bill)}
-            className="text-white bg-red-500 hover:bg-red-600 px-5 py-2 border border-zinc-800 rounded-sm"
+            onClick={() => handleSave(bill)}
+            className="text-white bg-green-500 hover:bg-green-600 px-5 py-2 border border-zinc-800 rounded-sm"
           >
             Save
           </button>
           <button
             onClick={() => dispatch(resetBill())}
-            className="text-white bg-red-500 hover:bg-red-600 px-5 py-2 border border-zinc-800 rounded-sm"
+            className="text-white bg-red-500 hover:bg-green-600 px-5 py-2 border border-zinc-800 rounded-sm"
           >
             Reset
           </button>
           <button
-            onClick={() => window.print()}
-            className="text-white bg-red-500 hover:bg-red-600 px-5 py-2 border border-zinc-800 rounded-sm"
+            onClick={handlePrint}
+            className="text-white bg-green-500 hover:bg-green-600 px-5 py-2 border border-zinc-800 rounded-sm"
           >
             Print
           </button>

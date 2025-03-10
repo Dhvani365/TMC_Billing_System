@@ -21,7 +21,7 @@ export const billSlice = createSlice({
       const item = state.items.find(item => item.id === id);
       if (item) {
         item.quantity = quantity;
-        item.total = item.quantity * item.price - item.discount; // Recalculate total
+        item.total = item.quantity * item.discountedPrice; // Recalculate total
       }
     }
   },

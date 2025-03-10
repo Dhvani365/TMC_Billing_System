@@ -1,5 +1,32 @@
 import SKU from '../models/sku.model.js';
 
+// Update SKU Image
+export const updateSKUImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const image = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+        };
+
+        const updatedSKU = await SKU.findByIdAndUpdate(
+            id,
+            { image },
+            { new: true, runValidators: true }
+        )
+            .populate('brand', 'name')
+            .populate('catalog', 'name');
+
+        if (!updatedSKU) {
+            return res.status(404).json({ message: "SKU not found" });
+        }
+
+        res.status(200).json({ message: "SKU updated successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating SKU image", error: error.message });
+    }
+};
+
 // Get all SKUs
 export const getSKUs = async (req, res) => {
     try {
@@ -35,8 +62,23 @@ export const getSKUById = async (req, res) => {
         if (!sku) {
             return res.status(404).json({ message: "SKU not found" });
         }
+
+        // Convert binary image data to base64-encoded string
+        const skusWithBase64Images = skus.map(sku => {
+            if (sku.image && sku.image.data) {
+                const base64Image = sku.image.data.toString('base64');
+                return {
+                    ...sku.toObject(),
+                    image: {
+                        ...sku.image,
+                        data: `data:${sku.image.contentType};base64,${base64Image}`
+                    }
+                };
+            }
+            return sku;
+        });
         
-        res.status(200).json(sku);
+        res.status(200).json(skusWithBase64Images);
     } catch (error) {
         res.status(500).json({ message: "Error fetching SKU", error: error.message });
     }

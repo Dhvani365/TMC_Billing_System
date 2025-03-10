@@ -12,7 +12,7 @@ import partyCatalogRoutes from "./routes/partyCatalog.route.js"
 import partyPricingSelectionRoutes from "./routes/partyPricingSelection.route.js"
 import pricingRoutes from "./routes/pricing.route.js"
 import skuRoutes from "./routes/sku.route.js"
-import partyBrandRoutes from "./routes/partyBrand.route.js"
+// import partyBrandRoutes from "./routes/partyBrand.route.js"
 import {connectDb} from "./lib/db.js"
  
 dotenv.config({path : '../.env'});

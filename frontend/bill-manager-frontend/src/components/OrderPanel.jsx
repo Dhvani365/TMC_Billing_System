@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedCatalog } from "@/store/catalogSlice"; 
 import { addToBill } from "@/store/billSlice"; // Import bill action
@@ -22,13 +22,16 @@ const OrderPanel = () => {
   const [wspDiscount, setWspDiscount] = useState(0);
   const [cpDiscount, setCpDiscount] = useState(0);
 
+  const catalogRefs = useRef([]);
+  const productRefs = useRef([]);
+
   // Fetch catalogs when the selected brand changes
   useEffect(() => {
     const fetchCatalogs = async () => {
       if (selectedBrand) {
         try {
           const response = await axios.get(`http://localhost:3000/api/catalog/brandid/${selectedBrand._id}`);
-          console.log(response.data);  
+          // console.log(response.data);  
           setCatalogs(response.data);  
         } catch (error) {
           console.error("Error fetching catalogs:", error);
@@ -52,7 +55,7 @@ const OrderPanel = () => {
       if (selectedCatalog) {
         try {
           const response = await axios.get(`http://localhost:3000/api/sku/catalog/${selectedCatalog._id}`);
-          console.log(response.data);
+          // console.log(response.data);
           setProducts(response.data);
         } catch (error) {
           console.error("Error fetching products:", error);
@@ -71,16 +74,16 @@ const OrderPanel = () => {
       if (selectedProduct && selectedParty && selectedBrand && selectedCatalog) {
         try {
           const partyPricingResponse = await axios.get(`http://localhost:3000/api/partyPricingSelection/${selectedParty._id}`);
-          console.log("Pricing Details: ", partyPricingResponse.data[0].default_price);
+          // console.log("Pricing Details: ", partyPricingResponse.data[0].default_price);
           setPartyPricing(partyPricingResponse.data[0].default_price);
 
           const pricingResponse = await axios.get(`http://localhost:3000/api/pricing/${selectedBrand._id}`);
-          console.log("pricingResponse Details: ", pricingResponse.data);
+          // console.log("pricingResponse Details: ", pricingResponse.data);
           setWspPrice(pricingResponse.data.wsp);
           setCpPrice(pricingResponse.data.cp);
 
           const discountResponse = await axios.get(`http://localhost:3000/api/discount/${selectedParty._id}/${selectedBrand._id}/${selectedCatalog._id}`);
-          console.log("Discount Details: ", discountResponse.data);
+          // console.log("Discount Details: ", discountResponse.data);
           setWspDiscount(discountResponse.data.wsp_discount || 0);
           setCpDiscount(discountResponse.data.cp_discount || 0);
         } catch (error) {
@@ -99,6 +102,11 @@ const OrderPanel = () => {
   const handleAddToBill = () => {
     if (!selectedProduct) {
       alert("Please select a product.");
+      return;
+    }
+
+    if(!selectedPriceType && partyPricing === "Both"){
+      alert("Please select a party pricing.");  
       return;
     }
 
@@ -130,23 +138,58 @@ const OrderPanel = () => {
     const discountAmount = (price * discountPercentage) / 100;
     const discountedPrice = price - discountAmount;
 
+    // Generate a unique ID using product ID and timestamp
+    const uniqueId = `${selectedProduct._id}-${Date.now()}`;
+
     // Prepare bill data
     const billItem = {
+      id: uniqueId,
       productName: selectedProduct.sku_number,
-      price: price.toFixed(2),
+      price: selectedProduct.price.toFixed(2),
       priceType: partyPricing=="Both"? selectedPriceType : partyPricing,
       discountPercentage: discountPercentage,
       discountedPrice: discountedPrice.toFixed(2),
-      // total: discountedPrice.toFixed(2),
+      quantity: 1,
+      total: discountedPrice
     };
 
-    console.log("Bill Details: ", billItem)
+    // console.log("Bill Details: ", billItem)
     // Dispatch to Redux
     dispatch(addToBill(billItem));
 
     // Reset Selection
     setSelectedProduct(null);
     setSelectedPriceType("");
+  };
+
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+  const handleCatalogKeyDown = (e, index) => {
+    if (e.key === 'Enter') {
+      dispatch(setSelectedCatalog(catalogs[index]));
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const nextIndex = (index + 1) % catalogs.length;
+      catalogRefs.current[nextIndex].focus();
+    }
+  };
+
+  const handleProductKeyDown = (e, index) => {
+    if (e.key === 'Enter') {
+      setSelectedProduct(products[index]);
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const nextIndex = (index + 1) % products.length;
+      productRefs.current[nextIndex].focus();
+    }
   };
 
   return (
@@ -160,10 +203,13 @@ const OrderPanel = () => {
           <h3 className="text-md font-bold mb-2">Select a Catalog</h3>
           <div className="grid grid-cols-4 gap-4">
             {catalogs.length > 0 ? (
-              catalogs.map((catalog) => (
+              catalogs.map((catalog, index) => (
                 <div
                   key={catalog._id}
                   className="border p-3 rounded-md shadow-md cursor-pointer bg-white text-center hover:bg-gray-200"
+                  tabIndex={0}
+                  ref={(el) => (catalogRefs.current[index] = el)}
+                  onKeyDown={(e) => handleCatalogKeyDown(e, index)}
                   onClick={() => dispatch(setSelectedCatalog(catalog))}
                 >
                   <h3 className="font-semibold">{catalog.name}</h3>
@@ -189,15 +235,18 @@ const OrderPanel = () => {
           <h3 className="text-md font-bold mb-2">Products in {selectedCatalog.name}</h3>
           <div className="grid grid-cols-4 gap-4">
             {products.length > 0 ? (
-              products.map((product) => (
+              products.map((product, index) => (
                 <div
                   key={product._id}
                   className={`border cursor-pointer p-2 rounded-md shadow-md bg-white text-center ${
-                    selectedProduct?.id === product.id ? "border-green-500" : ""
+                    selectedProduct?._id === product._id ? "border-green-500" : ""
                   }`}
+                  tabIndex={0}
+                  ref={(el) => (productRefs.current[index] = el)}
+                  onKeyDown={(e) => handleProductKeyDown(e, index)}
                   onClick={() => setSelectedProduct(product)}
                 >
-                  <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded-md" />
+                  <img src={`data:${product.image.contentType};base64,${arrayBufferToBase64(product.image.data.data)}`} alt={product.name} className="w-full h-32 object-cover rounded-md" />
                   <h3 className="text-sm font-bold mt-2">{product.name}</h3>
                   <p className="text-xs text-gray-500">SKU: {product.sku_number}</p>
                   <p className="text-sm mt-1">Price: <b>₹{product.price}</b></p>
