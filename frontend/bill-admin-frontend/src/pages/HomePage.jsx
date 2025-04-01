@@ -6,10 +6,10 @@ import Dashboard from '../components/Dashboard';
 function HomePage() {
   return (
     <div className='flex flex-row h-screen'>
-        <div className='w-[15%]'>
+        {/* <div className='w-[15%]'>
             <Sidebar/>
-        </div>
-        <div className='w-[75%]'>
+        </div> */}
+        <div className='w-[100%]'>
             <Dashboard/>
         </div>
     </div>

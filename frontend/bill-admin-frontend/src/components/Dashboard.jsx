@@ -6,7 +6,7 @@ const Dashboard = () => {
         <div className='w-[15%]'>
             <Sidebar/>
         </div>
-        <div className='w-[90%] flex h-screen bg-gray-100'>            
+        <div className='w-[85%] flex h-screen bg-gray-100'>            
             {/* Main Content */}
             <div className="flex-1 p-6">
               {/* Header */}
