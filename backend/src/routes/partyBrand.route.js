@@ -3,7 +3,7 @@ import { getPartyBrands, getPartyBrandByParty, addPartyBrand, deletePartyBrand }
 
 const router = express.Router();
 
-router.get("/", getPartyBrands);
+// router.get("/", getPartyBrands);//See if you want the partybrand add and delete route for when party add logic
 router.get("/:party_id", getPartyBrandByParty);
 router.post("/add", addPartyBrand);
 router.delete("/delete/:party_id/:brand_id", deletePartyBrand);

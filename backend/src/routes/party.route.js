@@ -3,7 +3,7 @@ import { getParties, getPartyById, addParty, updateParty, deleteParty } from "..
 
 const router = express.Router();
 
-router.get("/", getParties);
+router.get("/", getParties);//
 router.get("/:id", getPartyById);
 router.post("/add", addParty);
 router.put("/update/:id", updateParty);
