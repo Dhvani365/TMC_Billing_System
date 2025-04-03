@@ -2,10 +2,6 @@ import Sidebar from './Sidebar';
 
 const Dashboard = () => {
   return (
-    <div className='flex flex-row h-screen'>
-        <div className='w-[15%]'>
-            <Sidebar/>
-        </div>
         <div className='w-[90%] flex h-screen bg-gray-100'>            
             {/* Main Content */}
             <div className="flex-1 p-6">
@@ -22,9 +18,7 @@ const Dashboard = () => {
                 <StatCard title="Revenue" value="₹42,50,000" />
               </div>
             </div>
-        </div>
-    </div>
-    
+        </div>    
   );
 };
 
