@@ -3,7 +3,7 @@ import { getPricing, getPricingByBrand, addPricing, updatePricing, deletePricing
 
 const router = express.Router();
 
-router.get("/:party_id/:brand_id/:sku_id", getPricing);
+router.get("/:party_id/:brand_id/:catalog_id/:sku_id", getPricing);
 // router.get("/:brand_id", getPricingByBrand);
 // router.post("/add", addPricing);
 // router.put("/update/:brand_id", updatePricing);

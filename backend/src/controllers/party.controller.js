@@ -1,40 +1,39 @@
 import Party from '../models/party.model.js';
+import PartyBrandRelationData from '../models/partyBrandSelection.model.js';
 
 // Get all parties
 export const getParties = async (req, res) => {
     try {
         const parties = await Party.find()
-            .populate('selected_brands', 'name')
-            .populate('selected_catalogs', 'name');
         res.status(200).json(parties);
     } catch (error) {
         res.status(500).json({ message: "Error fetching parties", error: error.message });
     }
 };
 
-// Get party by ID
-export const getPartyById = async (req, res) => {
+//get party by id
+//send brand name
+export const getPartiesById = async (req, res) => {
     try {
-        const party = await Party.findById(req.params.id)
-            .populate('selected_brands', 'name')
-            .populate('selected_catalogs', 'name');
-            
-        if (!party) {
-            return res.status(404).json({ message: "Party not found" });
-        }
-        
-        res.status(200).json(party);
+        const party = await Party.findOne(req.params.id)
+        const Relations = await PartyBrandRelationData.find({party:req.params.id})
+        res.status(200).json({party: party,
+                              reletions: Relations});
     } catch (error) {
-        res.status(500).json({ message: "Error fetching party", error: error.message });
+        res.status(500).json({ message: "Error fetching parties", error: error.message });
     }
 };
 
 // Add new party
+//list_of_selected_brands = [{
+                            // brand_id:,
+                            // Pricing_type,
+                            // discount:,
+                            //     }]
 export const addParty = async (req, res) => {
     try {
-        const { name, gst_no, address, preferred_courier, selected_brands, selected_catalogs } = req.body;
+        const { name, gst_no, address, preferred_courier, list_of_selected_brands } = req.body;
 
-        // Check if GST number already exists
         const existingParty = await Party.findOne({ gst_no });
         if (existingParty) {
             return res.status(400).json({ message: "Party with this GST number already exists" });
@@ -45,34 +44,41 @@ export const addParty = async (req, res) => {
             gst_no,
             address,
             preferred_courier,
-            selected_brands,
-            selected_catalogs
         });
 
         const savedParty = await newParty.save();
-        const populatedParty = await savedParty
-            .populate('selected_brands', 'name')
-            .populate('selected_catalogs', 'name');
+        for(let i = 0; i < list_of_selected_brands.length; i++)
+        {
+            var newRelation = new PartyBrandRelationData({
+                party: savedParty._id,
+                brand: list_of_selected_brands[i].brand_id,
+                default_price: list_of_selected_brands[i].pricing_type,
+                discount: list_of_selected_brands[i].discount
+            });
+            await newRelation.save()
+        }
+        
 
-        res.status(201).json(populatedParty);
+        res.status(201).json(newParty);
     } catch (error) {
         res.status(500).json({ message: "Error creating party", error: error.message });
     }
 };
 
 // Update party
+//list_of_required_relations = [{
+                            // relation_id:,
+                            // required: 0,1     }]
 export const updateParty = async (req, res) => {
     try {
-        const { name, gst_no, address, preferred_courier, selected_brands, selected_catalogs } = req.body;
+        const { name, gst_no, address, preferred_courier, list_of_selected_brands} = req.body;
 
-        // Check if new GST number already exists for another party
         const existingParty = await Party.findOne({
-            gst_no,
             _id: { $ne: req.params.id }
         });
 
-        if (existingParty) {
-            return res.status(400).json({ message: "Party with this GST number already exists" });
+        if (!existingParty) {
+            return res.status(400).json({ message: "Party not found" });
         }
 
         const updatedParty = await Party.findByIdAndUpdate(
@@ -82,14 +88,20 @@ export const updateParty = async (req, res) => {
                 gst_no,
                 address,
                 preferred_courier,
-                selected_brands,
-                selected_catalogs
             },
             { new: true, runValidators: true }
-        )
-            .populate('selected_brands', 'name')
-            .populate('selected_catalogs', 'name');
-
+        );
+        await PartyBrandRelationData.deleteMany({party : existingParty._id})
+        for(let i = 0; i < list_of_selected_brands.length; i++)
+            {
+                var newRelation = new PartyBrandRelationData({
+                    party: existingParty._id,
+                    brand: list_of_selected_brands[i].brand_id,
+                    default_price: list_of_selected_brands[i].pricing_type,
+                    discount: list_of_selected_brands[i].discount
+                });
+                await newRelation.save()
+            }
         if (!updatedParty) {
             return res.status(404).json({ message: "Party not found" });
         }
@@ -104,7 +116,7 @@ export const updateParty = async (req, res) => {
 export const deleteParty = async (req, res) => {
     try {
         const deletedParty = await Party.findByIdAndDelete(req.params.id);
-        
+        await PartyBrandRelationData.deleteMany({ party: req.params.id })
         if (!deletedParty) {
             return res.status(404).json({ message: "Party not found" });
         }
