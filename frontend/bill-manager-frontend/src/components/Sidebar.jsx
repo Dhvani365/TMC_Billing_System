@@ -33,7 +33,7 @@ const Sidebar = () => {
           console.error("Error fetching brands:", error);
           setBrands([]);
         } finally {
-          setTimeout(() => setLoadingBrands(false), 4000); // Simulate loading delay
+          setTimeout(() => setLoadingBrands(false), 200); // Simulate loading delay
         }
       } else {
         setBrands([]);

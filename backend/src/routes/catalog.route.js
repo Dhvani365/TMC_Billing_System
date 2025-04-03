@@ -3,7 +3,7 @@ import { getCatalogs, getCatalogById, addCatalog, updateCatalog, deleteCatalog ,
 
 const router = express.Router();
 
-router.get("/", getCatalogs);
+// router.get("/", getCatalogs);
 router.get("/:id", getCatalogById);
 router.get("/brandid/:id", getCatalogsByBrand);
 router.post("/add", addCatalog);

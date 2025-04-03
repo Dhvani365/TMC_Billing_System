@@ -40,7 +40,7 @@ const OrderPanel = () => {
           console.error("Error fetching catalogs:", error);
           setCatalogs([]);
         } finally {
-          setTimeout(() => setLoadingCatalogs(false), 2000); // Simulate loading delay
+          setTimeout(() => setLoadingCatalogs(false), 200); // Simulate loading delay
         }
       } else {
         setCatalogs([]);
