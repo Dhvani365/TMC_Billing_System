@@ -4,8 +4,6 @@ import PartyBrandSelection from '../models/partyBrandSelection.model.js';
 export const getPartyBrands = async (req, res) => {
     try {
         const partyBrands = await PartyBrandSelection.find()
-            .populate('party', 'name')
-            .populate('brand', 'name');
         res.status(200).json(partyBrands);
     } catch (error) {
         res.status(500).json({ message: "Error fetching party brand selections", error: error.message });

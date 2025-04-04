@@ -39,13 +39,13 @@ export const getSKUs = async (req, res) => {
     }
 };
 
-export const getSKUsByBrandAndCatalog = async (req, res) => {
+export const getSKUsByCatalog = async (req, res) => {
     try {
       const { catalogId } = req.params;
   
       // Fetch SKUs for the given brand and catalog
       const skus = await SKU.find({ catalog: catalogId });
-  
+        
       res.status(200).json(skus);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving SKUs", error });
