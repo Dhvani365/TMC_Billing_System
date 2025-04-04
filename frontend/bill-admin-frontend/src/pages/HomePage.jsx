@@ -2,12 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from "../components/ui/table";
-
-const partiesData = [
-  { id: 1, name: "Alpha Traders", gst: "GST1234", address: "123 Street, City", courier: "DHL", wsr_discount: 5, cp_discount: 10 },
-  { id: 2, name: "Beta Distributors", gst: "GST5678", address: "456 Avenue, Town", courier: "FedEx", wsr_discount: 8, cp_discount: 12 },
-  { id: 3, name: "Gamma Suppliers", gst: "GST9101", address: "789 Road, Village", courier: "UPS", wsr_discount: 6, cp_discount: 15 }
-];
+import axios from "axios"; // Import axios for API requests
 
 function HomePage() {
   const navigate = useNavigate();
@@ -15,11 +10,34 @@ function HomePage() {
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [parties, setParties] = useState(partiesData);
+  const [parties, setParties] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
   const [editedData, setEditedData] = useState({});
 
+  // Fetch data from the API when the component loads
   useEffect(() => {
+    const fetchParties = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/party");
+        console.log("Fetched Parties Data:", response.data); // Log the fetched data
+        setParties(response.data); // Update the state with the fetched data
+
+        // Fetch brand names for all parties
+        const brandRequests = response.data.flatMap((party) =>
+          party.selected_brands.map((brandId) =>
+            axios.get(`http://localhost:3000/api/brand/${brandId}`)
+          )
+        );
+
+        const brandResponses = await Promise.all(brandRequests);
+        const brandData = brandResponses.map((res) => res.data);
+        console.log("Fetched Brand Data:", brandData); // Log the fetched brand data
+      } catch (error) {
+        console.error("Error fetching parties or brands data:", error);
+      }
+    };
+
+    fetchParties();
     searchInputRef.current?.focus();
   }, []);
 
@@ -41,36 +59,6 @@ function HomePage() {
     } else {
       setSelectedRows(parties.map((party) => party.id));
     }
-  };
-
-  const handleExportParties = () => {
-    const exportedData = parties.filter((party) => selectedRows.includes(party.id));
-    console.log("Exported Parties Data:", exportedData);
-    alert("Exported Parties data has been logged to the console.");
-  };
-
-  const handleEdit = (id) => {
-    setEditingRow(id);
-    const partyToEdit = parties.find((party) => party.id === id);
-    setEditedData(partyToEdit);
-  };
-
-  const handleSave = (id) => {
-    setParties((prevParties) =>
-      prevParties.map((party) =>
-        party.id === id ? { ...party, ...editedData } : party
-      )
-    );
-    setEditingRow(null);
-  };
-
-  const handleDelete = (id) => {
-    setParties((prevParties) => prevParties.filter((party) => party.id !== id));
-    setSelectedRows((prevSelected) => prevSelected.filter((rowId) => rowId !== id));
-  };
-
-  const handleInputChange = (e, field) => {
-    setEditedData({ ...editedData, [field]: e.target.value });
   };
 
   return (
@@ -95,31 +83,6 @@ function HomePage() {
         </div>
       </div>
 
-      {selectedRows.length > 0 && (
-        <div className="flex gap-4 mb-4">
-          <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            onClick={handleExportParties}
-          >
-            Export Selected Parties
-          </Button>
-          {selectedRows.length === 1 && (
-            <Button
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onClick={() => handleEdit(selectedRows[0])}
-            >
-              Edit Selected Party
-            </Button>
-          )}
-          <Button
-            className="bg-red-500 hover:bg-red-600 text-white"
-            onClick={() => handleDelete(selectedRows[0])}
-          >
-            Delete Selected Party
-          </Button>
-        </div>
-      )}
-
       <Table className="border border-gray-200 rounded-lg">
         <TableHeader>
           <TableRow>
@@ -131,7 +94,6 @@ function HomePage() {
                 className="w-4 h-4"
               />
             </TableHead>
-            <TableHead>ID</TableHead>
             <TableHead>Party Name</TableHead>
             <TableHead>GST Number</TableHead>
             <TableHead>Address</TableHead>
@@ -151,77 +113,12 @@ function HomePage() {
                   className="w-4 h-4"
                 />
               </TableCell>
-              {editingRow === party.id ? (
-                <>
-                  <TableCell>{party.id}</TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={editedData.name}
-                      onChange={(e) => handleInputChange(e, "name")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={editedData.gst}
-                      onChange={(e) => handleInputChange(e, "gst")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={editedData.address}
-                      onChange={(e) => handleInputChange(e, "address")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="text"
-                      value={editedData.courier}
-                      onChange={(e) => handleInputChange(e, "courier")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      value={editedData.wsr_discount}
-                      onChange={(e) => handleInputChange(e, "wsr_discount")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <input
-                      type="number"
-                      value={editedData.cp_discount}
-                      onChange={(e) => handleInputChange(e, "cp_discount")}
-                      className="border rounded p-1"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      className="bg-green-500 hover:bg-green-600 text-white"
-                      onClick={() => handleSave(party.id)}
-                    >
-                      Save
-                    </Button>
-                  </TableCell>
-                </>
-              ) : (
-                <>
-                  <TableCell>{party.id}</TableCell>
-                  <TableCell>{party.name}</TableCell>
-                  <TableCell>{party.gst}</TableCell>
-                  <TableCell>{party.address}</TableCell>
-                  <TableCell>{party.courier}</TableCell>
-                  <TableCell>{party.wsr_discount}%</TableCell>
-                  <TableCell>{party.cp_discount}%</TableCell>
-                </>
-              )}
+              <TableCell>{party.name}</TableCell>
+              <TableCell>{party.gst_no}</TableCell>
+              <TableCell>{party.address}</TableCell>
+              <TableCell>{party.preferred_courier}</TableCell>
+              <TableCell>{party.wsr_discount}%</TableCell>
+              <TableCell>{party.cp_discount}%</TableCell>
             </TableRow>
           ))}
         </TableBody>
