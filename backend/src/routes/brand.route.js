@@ -6,9 +6,8 @@ const router = express.Router();
 
 router.get("/", getBrands);
 router.get("/:id", getBrandById);
-router.post("/add" ,addBrand);//, upload.single("image")
+router.post("/add",addBrand);
 router.put("/update/:id", updateBrand); //Check If they are updating image or not if they are use UpdateImage route
-// router.post("/updateImage/:id", upload.single("image") ,updateBrandImage);
 router.delete("/delete/:id", deleteBrand);
 
 export default router;
