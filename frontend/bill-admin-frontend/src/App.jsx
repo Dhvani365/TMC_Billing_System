@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
-import AddClientForm from './components/AddClientForm';
+import AddClientForm from './components/AddPartyForm';
 import HomePage from './pages/HomePage';
 import BrandsList from './components/BrandsList';
 import CatalogList from './components/CatalogList';
@@ -10,6 +10,7 @@ import AddCatalogs from './components/AddCatalogs';
 import AddPricingForm from './components/AddPricingForm';
 import PartyDiscount from './components/PartyDiscount';
 import ViewUsers from './components/ViewUsers';
+import SpecialDiscountList from './components/SpecialDiscountList';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
           <Route path="/client-profile" element={<HomePage />} />
           <Route path="/client-pricing" element={<Dashboard />} />
           <Route path="/add-catalog" element={<AddCatalogs />} />
-          <Route path="/special-discount" element={<PartyDiscount />} />
+          <Route path="/special-discount" element={<SpecialDiscountList />} />
           <Route path="/user-accounts" element={<ViewUsers />} />
         </Route>
       </Routes>
