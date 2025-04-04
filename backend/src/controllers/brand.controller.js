@@ -1,4 +1,9 @@
 import Brand from '../models/brand.model.js';
+import partyBrandSelectionModel from '../models/partyBrandSelection.model.js';
+import skuModel from '../models/sku.model.js';
+import catalogModel from '../models/catalog.model.js';
+import SpecialDiscountModel from '../models/specialDiscount.model.js';
+
 
 // Get all brands
 export const getBrands = async (req, res) => {
@@ -26,18 +31,14 @@ export const getBrandById = async (req, res) => {
 // Add new brand
 export const addBrand = async (req, res) => {
     try {
-        const { name } = req.body;
-        const image = {
-            data: req.file.buffer,
-            contentType: req.file.mimetype,
-        };
+        const { name, gst_rate, available_prices} = req.body;
         // Check if brand already exists
         const existingBrand = await Brand.findOne({ name });
         if (existingBrand) {
             return res.status(400).json({ message: "Brand already exists" });
         }
         
-        const newBrand = new Brand({ name, image});
+        const newBrand = new Brand({ name, gst_rate, available_prices});
         const savedBrand = await newBrand.save();
         
         res.status(201).json(savedBrand);
@@ -49,7 +50,7 @@ export const addBrand = async (req, res) => {
 // Update brand
 export const updateBrand = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name , gst_rate, available_prices} = req.body;
         
         // Check if new name already exists for another brand
         const existingBrand = await Brand.findOne({ 
@@ -57,29 +58,29 @@ export const updateBrand = async (req, res) => {
             _id: { $ne: req.params.id } 
         });
         
-        if (existingBrand) {
-            return res.status(400).json({ message: "Brand name already exists" });
+        if (!existingBrand) {
+            return res.status(400).json({ message: "Brand name does not already exists" });
         }
 
         const updatedBrand = await Brand.findByIdAndUpdate(
             req.params.id,
-            { name },
+            { name , gst_rate,available_prices},
             { new: true, runValidators: true }
         );
 
-        if (!updatedBrand) {
-            return res.status(404).json({ message: "Brand not found" });
-        }
-
-        res.status(200).json(updatedBrand);
+        return res.status(200).json(updatedBrand);
     } catch (error) {
-        res.status(500).json({ message: "Error updating brand", error: error.message });
+        return res.status(500).json({ message: "Error updating brand", error: error.message });
     }
 };
 
 // Delete brand
 export const deleteBrand = async (req, res) => {
     try {
+        const deletedsku = await skuModel.deleteMany({brand: req.params.id});
+        const deletedpartyBrandSelection = await partyBrandSelectionModel.deleteMany({brand: req.params.id});
+        const deletedcatalog = await catalogModel.deleteMany({brand: req.params.id});
+        const deletedSpecialDiscount = await SpecialDiscountModel.deleteMany({brand_id: req.params.id});
         const deletedBrand = await Brand.findByIdAndDelete(req.params.id);
         
         if (!deletedBrand) {

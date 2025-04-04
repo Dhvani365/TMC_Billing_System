@@ -1,13 +1,31 @@
 import SKU from '../models/sku.model.js';
+import sharp from 'sharp';
 
 // Update SKU Image
 export const updateSKUImage = async (req, res) => {
     try {
         const { id } = req.params;
+        let outputFormat = 'jpeg'; // Default to JPEG
+        let outputOptions = { quality: 80 };
+
+        if (req.file.mimetype === 'image/png') {
+            outputFormat = 'png';
+            outputOptions = { compressionLevel: 8 }; // PNG compression (0-9)
+        } 
+        else if (req.file.mimetype === 'image/webp') {
+            outputFormat = 'webp';
+            outputOptions = { quality: 80 };
+        }
+
+        const compressedImageBuffer = await sharp(req.file.buffer)
+            .resize({ width: 800, withoutEnlargement: true }) // Resize to lower resolution, don't enlarge small images
+            [outputFormat](outputOptions) // Use determined format and options
+            .toBuffer();
+            
         const image = {
-            data: req.file.buffer,
-            contentType: req.file.mimetype,
-        };
+            data: compressedImageBuffer,
+            contentType: `image/${outputFormat}`,
+        }
 
         const updatedSKU = await SKU.findByIdAndUpdate(
             id,
@@ -28,16 +46,16 @@ export const updateSKUImage = async (req, res) => {
 };
 
 // Get all SKUs
-export const getSKUs = async (req, res) => {
-    try {
-        const skus = await SKU.find()
-            .populate('brand', 'name')
-            .populate('catalog', 'name');
-        res.status(200).json(skus);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching SKUs", error: error.message });
-    }
-};
+// export const getSKUs = async (req, res) => {
+//     try {
+//         const skus = await SKU.find()
+//             .populate('brand', 'name')
+//             .populate('catalog', 'name');
+//         res.status(200).json(skus);
+//     } catch (error) {
+//         res.status(500).json({ message: "Error fetching SKUs", error: error.message });
+//     }
+// };
 
 export const getSKUsByCatalog = async (req, res) => {
     try {
@@ -88,10 +106,29 @@ export const getSKUById = async (req, res) => {
 export const addSKU = async (req, res) => {
     try {
         const { brand, catalog, sku_number, price } = req.body;
-        const image = {
-            data: req.file.buffer,
-            contentType: req.file.mimetype,
+
+        let outputFormat = 'jpeg'; // Default to JPEG
+        let outputOptions = { quality: 80 };
+
+        if (req.file.mimetype === 'image/png') {
+            outputFormat = 'png';
+            outputOptions = { compressionLevel: 8 }; // PNG compression (0-9)
+        } 
+        else if (req.file.mimetype === 'image/webp') {
+            outputFormat = 'webp';
+            outputOptions = { quality: 80 };
         }
+
+        const compressedImageBuffer = await sharp(req.file.buffer)
+            .resize({ width: 800, withoutEnlargement: true }) // Resize to lower resolution, don't enlarge small images
+            [outputFormat](outputOptions) // Use determined format and options
+            .toBuffer();
+            
+        const image = {
+            data: compressedImageBuffer,
+            contentType: `image/${outputFormat}`,
+        }
+
 
         // Check if SKU number already exists
         const existingSKU = await SKU.findOne({ sku_number });
