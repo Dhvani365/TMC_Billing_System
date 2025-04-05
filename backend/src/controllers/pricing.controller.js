@@ -1,6 +1,5 @@
-import skuModel from "../models/sku.model";
-import partyBrandSelectionModel from "../models/partyBrandSelection.model";
-import SpecialDiscount from "../models/specialDiscount.model";
+import SKU from "../models/sku.model.js"; // Match the export name
+import SpecialDiscount from "../models/specialDiscount.model.js";
 
 // Get all pricing entries
 export const getPricing = async (req, res) => {

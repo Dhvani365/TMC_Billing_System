@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getPricing, getAllSKUPricingForBill, getPricingByBrand, addPricing, updatePricing, deletePricing } from "../controllers/pricing.controller.js";
+import { getPricing, getAllSKUPricingForBill} from "../controllers/pricing.controller.js";
 
 const router = express.Router();
 

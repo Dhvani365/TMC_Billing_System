@@ -1,4 +1,5 @@
 import Party from '../models/party.model.js';
+import Brand from "../models/brand.model.js"; // Import the Brand model
 import PartyBrandRelationData from '../models/partyBrandSelection.model.js';
 import mongoose from 'mongoose';
 import specialDiscountModel from '../models/specialDiscount.model.js';
@@ -16,12 +17,28 @@ export const getParties = async (req, res) => {
 //send brand name
 export const getPartiesById = async (req, res) => {
     try {
+        // Fetch the party by ID
         const party = await Party.findById(req.params.id);
-        const Relations = await PartyBrandRelationData.find({party:req.params.id}).populate('brand');
-        res.status(200).json({party: party,
-            relations: relations.map(rel => ({
-                brand: rel.brand,
-            }))
+        if (!party) {
+            return res.status(404).json({ message: "Party not found" });
+        }
+
+        // Fetch the relations and populate the brand details
+        const relations = await PartyBrandRelationData.find({ party: req.params.id })
+            .populate('brand'); // Populate all fields of the Brand model
+
+        // Map the relations to include full brand details
+        const mappedRelations = relations.map(rel => ({
+            id: rel._id,
+            brand: rel.brand, // Includes all fields of the Brand model
+            default_price: rel.default_price,
+            discount: rel.discount,
+        }));
+
+        // Return the party and its associated brands
+        res.status(200).json({
+            party,
+            relations: mappedRelations,
         });
     } catch (error) {
         res.status(500).json({ message: "Error fetching parties", error: error.message });
@@ -97,8 +114,8 @@ export const addParty = async (req, res) => {
 
 // Update party
 //list_of_required_relations = [{
-                            // relation_id:,
-                            // required: 0,1     }]
+// relation_id:,
+// required: 0,1     }]
 export const updateParty = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -120,35 +137,24 @@ export const updateParty = async (req, res) => {
             { new: true, runValidators: true, session }
         );
 
-        // Remove existing relations
-        await PartyBrandRelationData.deleteMany({ party: existingParty._id }).session(session);
-
-        // Validate and create new relations
-        const relationsToCreate = [];
+        // Update existing relations
         for (const brandData of list_of_selected_brands) {
-            const brand = await Brand.findById(brandData.brand_id).session(session);
-            if (!brand) {
+            const relation = await PartyBrandRelationData.findOne({
+                _id: brandData.relation_id, // Find by relation_id
+                party: req.params.id, // Ensure it belongs to the correct party
+                brand: brandData.brand_id, // Ensure it matches the correct brand
+            }).session(session);
+
+            if (!relation) {
                 await session.abortTransaction();
-                return res.status(400).json({ message: `Brand ${brandData.brand_id} not found` });
+                return res.status(400).json({ message: `Relation ${brandData.relation_id} not found for party ${req.params.id} and brand ${brandData.brand_id}` });
             }
 
-            if (!brand.available_prices.includes(brandData.pricing_type)) {
-                await session.abortTransaction();
-                return res.status(400).json({
-                    message: `Pricing type ${brandData.pricing_type} not allowed for brand ${brand.name}`
-                });
-            }
-
-            relationsToCreate.push({
-                party: existingParty._id,
-                brand: brandData.brand_id,
-                default_price: brandData.pricing_type,
-                discount: brandData.discount
-            });
+            // Update the relation fields
+            relation.default_price = brandData.pricing_type;
+            relation.discount = brandData.discount;
+            await relation.save({ session });
         }
-
-        // Bulk insert new relations
-        await PartyBrandRelationData.insertMany(relationsToCreate, { session });
 
         await session.commitTransaction();
         res.status(200).json(updatedParty);

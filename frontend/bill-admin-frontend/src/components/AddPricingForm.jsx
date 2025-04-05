@@ -1,23 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function AddPricingForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const clientData = location.state?.clientData;
 
-  const [brands, setBrands] = useState(
-    Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
-      name: `Brand ${i + 1}`,
-      pricingType: i % 3 === 0 ? "WSR" : i % 3 === 1 ? "CP" : "Both", // Example pricing types
-    }))
-  );
+  const [brands, setBrands] = useState([]); // Fetch brands from the backend
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
 
   useEffect(() => {
+    // Fetch brands from the backend
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/brand");
+        setBrands(response.data); // Set the fetched brands in state
+      } catch (error) {
+        console.error("Error fetching brands:", error.response?.data || error.message);
+        alert("Failed to fetch brands. Please try again.");
+      }
+    };
+
+    fetchBrands();
     searchInputRef.current?.focus();
   }, []);
 
@@ -25,10 +32,17 @@ function AddPricingForm() {
     if (selectedBrands.some((brand) => brand.id === brandId)) {
       setSelectedBrands(selectedBrands.filter((brand) => brand.id !== brandId));
     } else {
-      const selectedBrand = brands.find((brand) => brand.id === brandId);
+      const selectedBrand = brands.find((brand) => brand._id === brandId);
       setSelectedBrands([
         ...selectedBrands,
-        { id: brandId, discount: false, discountValue: "", cp: false, wsr: false },
+        {
+          id: brandId,
+          discount: false,
+          discountValue: "",
+          pricingType: selectedBrand.available_prices?.length === 1
+            ? selectedBrand.available_prices[0]
+            : "WSR", // Default to "Both" if both options are available
+        },
       ]);
     }
   };
@@ -41,11 +55,31 @@ function AddPricingForm() {
     );
   };
 
-  const handleSave = () => {
-    console.log("Client Data:", clientData);
-    console.log("Selected Brands:", selectedBrands);
-    alert("Pricing details saved successfully!");
-    navigate("/");
+  const handleSave = async () => {
+    try {
+      const payload = {
+        name: clientData.name,
+        address: clientData.address,
+        gst_no: clientData.gst,
+        preferred_courier: clientData.courier,
+        list_of_selected_brands: selectedBrands.map((brand) => ({
+          brand_id: brand.id,
+          pricing_type: brand.pricingType, // Send the selected pricing type
+          discount: brand.discount ? brand.discountValue : 0,
+        })),
+      };
+
+      console.log("Payload being sent:", payload);
+
+      // Make POST request to the backend
+      await axios.post("http://localhost:3000/api/party/add", payload);
+
+      alert("Party and pricing details saved successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error saving party and pricing details:", error.response?.data || error.message);
+      alert("Failed to save party and pricing details. Please try again.");
+    }
   };
 
   const filteredBrands = brands.filter((brand) =>
@@ -68,143 +102,97 @@ function AddPricingForm() {
         </div>
         <div className="mb-6 max-h-[400px] overflow-y-auto border-t border-b">
           {filteredBrands.map((brand) => {
-            const isSelected = selectedBrands.some((b) => b.id === brand.id);
-            const selectedBrand = selectedBrands.find((b) => b.id === brand.id);
+            const isSelected = selectedBrands.some((b) => b.id === brand._id);
+            const selectedBrand = selectedBrands.find((b) => b.id === brand._id);
             return (
               <div
-                key={brand.id}
+                key={brand._id}
                 className={`p-4 mb-4 rounded-lg shadow-md ${
                   isSelected ? "bg-green-50 border-l-4 border-green-500" : "bg-white"
                 }`}
               >
                 <div className="flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center"
-                    onClick={() => handleBrandSelection(brand.id)}
+                  <div
+                    className="flex items-center"
+                    onClick={() => handleBrandSelection(brand._id)}
                   >
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => handleBrandSelection(brand.id)}
+                      onChange={() => handleBrandSelection(brand._id)}
                       className="mr-3 h-4 w-4"
                     />
                     <span className="text-lg font-medium">{brand.name}</span>
                   </div>
                   <span className="text-sm text-gray-500">
-                    Pricing Type: {brand.pricingType}
+                    Pricing Type:{" "}
+                    {brand.available_prices?.length === 1
+                      ? brand.available_prices[0]
+                      : brand.available_prices?.includes("WSR") && brand.available_prices?.includes("CP")
+                      ? "Both"
+                      : "N/A"}
                   </span>
                 </div>
                 {isSelected && (
                   <div className="mt-4">
-                    {brand.pricingType === "WSR" && (
-                      <div className="flex items-center gap-4">
-                        <label className="text-gray-700 font-medium">Less/Discount?</label>
-                        <input
-                          type="checkbox"
-                          checked={selectedBrand?.discount || false}
-                          onChange={(e) =>
-                            handleBrandDetailsChange(brand.id, "discount", e.target.checked)
-                          }
-                          className="mr-2 h-4 w-4"
-                        />
-                        {selectedBrand?.discount && (
-                          <input
-                            type="number"
-                            placeholder="Enter Discount %"
-                            value={selectedBrand?.discountValue || ""}
-                            onChange={(e) =>
-                              handleBrandDetailsChange(
-                                brand.id,
-                                "discountValue",
-                                e.target.value
-                              )
-                            }
-                            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
-                        )}
-                      </div>
-                    )}
-                    {brand.pricingType === "CP" && (
-                      <div className="flex items-center gap-4">
-                        <label className="text-gray-700 font-medium">Less/Discount?</label>
-                        <input
-                          type="checkbox"
-                          checked={selectedBrand?.discount || false}
-                          onChange={(e) =>
-                            handleBrandDetailsChange(brand.id, "discount", e.target.checked)
-                          }
-                          className="mr-2 h-4 w-4"
-                        />
-                        {selectedBrand?.discount && (
-                          <input
-                            type="number"
-                            placeholder="Enter Discount %"
-                            value={selectedBrand?.discountValue || ""}
-                            onChange={(e) =>
-                              handleBrandDetailsChange(
-                                brand.id,
-                                "discountValue",
-                                e.target.value
-                              )
-                            }
-                            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
-                        )}
-                      </div>
-                    )}
-                    {brand.pricingType === "Both" && (
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-row items-center gap-4">
-                          <label className="text-gray-700 font-medium">
+                    {brand.available_prices?.includes("WSR") &&
+                      brand.available_prices?.includes("CP") && (
+                        <div className="flex items-center gap-4">
+                          <label className="text-gray-700 font-medium">Select Pricing Type:</label>
+                          <label>
+                            <input
+                              type="radio"
+                              name={`pricingType-${brand._id}`}
+                              value="WSR"
+                              checked={selectedBrand?.pricingType === "WSR" || selectedBrand?.pricingType === "Both" }
+                              onChange={(e) =>
+                                handleBrandDetailsChange(brand._id, "pricingType", e.target.value)
+                              }
+                              className="mr-2"
+                            />
                             WSR
                           </label>
-                          <input
-                            type="checkbox"
-                            checked={selectedBrand?.wsr || false}
-                            onChange={(e) =>
-                              handleBrandDetailsChange(brand.id, "wsr", e.target.checked)
-                            }
-                            className="mr-2 h-4 w-4"
-                          />
-                          <label className="text-gray-700 font-medium">
+                          <label>
+                            <input
+                              type="radio"
+                              name={`pricingType-${brand._id}`}
+                              value="CP"
+                              checked={selectedBrand?.pricingType === "CP"}
+                              onChange={(e) =>
+                                handleBrandDetailsChange(brand._id, "pricingType", e.target.value)
+                              }
+                              className="mr-2"
+                            />
                             CP
                           </label>
-                          <input
-                            type="checkbox"
-                            checked={selectedBrand?.cp || false}
-                            onChange={(e) =>
-                              handleBrandDetailsChange(brand.id, "cp", e.target.checked)
-                            }
-                            className="mr-2 h-4 w-4"
-                          />
                         </div>
-                        <div className="flex items-center gap-4">
-                        <label className="text-gray-700 font-medium">Less/Discount?</label>
+                      )}
+                    <div className="flex items-center gap-4 mt-4">
+                      <label className="text-gray-700 font-medium">Discount?</label>
+                      <input
+                        type="checkbox"
+                        checked={selectedBrand?.discount || false}
+                        onChange={(e) =>
+                          handleBrandDetailsChange(brand._id, "discount", e.target.checked)
+                        }
+                        className="mr-2 h-4 w-4"
+                      />
+                      {selectedBrand?.discount && (
                         <input
-                          type="checkbox"
-                          checked={selectedBrand?.discount || false}
+                          type="number"
+                          placeholder="Enter Discount %"
+                          value={selectedBrand?.discountValue || ""}
                           onChange={(e) =>
-                            handleBrandDetailsChange(brand.id, "discount", e.target.checked)
+                            handleBrandDetailsChange(
+                              brand._id,
+                              "discountValue",
+                              e.target.value
+                            )
                           }
-                          className="mr-2 h-4 w-4"
+                          className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
-                        {selectedBrand?.discount && (
-                          <input
-                            type="number"
-                            placeholder="Enter Discount %"
-                            value={selectedBrand?.discountValue || ""}
-                            onChange={(e) =>
-                              handleBrandDetailsChange(
-                                brand.id,
-                                "discountValue",
-                                e.target.value
-                              )
-                            }
-                            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
-                        )}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

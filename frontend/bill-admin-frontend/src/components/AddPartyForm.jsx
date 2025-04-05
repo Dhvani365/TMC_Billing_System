@@ -5,7 +5,7 @@ function AddClientForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    // phone: "",
     address: "",
     gst: "",
     courier: "",
@@ -36,7 +36,7 @@ function AddClientForm() {
               required
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-600 mb-1">Phone Number</label>
             <input
               type="number"
@@ -46,7 +46,7 @@ function AddClientForm() {
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label className="block text-gray-600 mb-1">Address</label>
             <textarea
@@ -60,7 +60,7 @@ function AddClientForm() {
           <div className="mb-4">
             <label className="block text-gray-600 mb-1">GST Number</label>
             <input
-              type="number"
+              type="text"
               name="gst"
               value={formData.gst}
               onChange={handleChange}

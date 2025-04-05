@@ -2,26 +2,57 @@ import React, { useState, useRef, useEffect } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import AddBrands from "./AddBrands";
+import axios from 'axios';
 
-const initialBrandsData = [
-  { id: 1, name: "Nike", category: "Sportswear", status: "Active" },
-  { id: 2, name: "Apple", category: "Technology", status: "Active" },
-  { id: 3, name: "Samsung", category: "Electronics", status: "Inactive" },
-];
+// const initialBrandsData = [
+//   { id: 1, name: "Nike", category: "Sportswear", status: "Active" },
+//   { id: 2, name: "Apple", category: "Technology", status: "Active" },
+//   { id: 3, name: "Samsung", category: "Electronics", status: "Inactive" },
+// ];
 
 export default function BrandsList() {
-  const [brandsData, setBrandsData] = useState(initialBrandsData);
+  const [brandsData, setBrandsData] = useState(null);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]); // Store selected row IDs
   const [searchTerm, setSearchTerm] = useState("");
   const [editingRow, setEditingRow] = useState(null); // Track the row being edited
   const [editedData, setEditedData] = useState({}); // Store edited data
   const searchInputRef = useRef(null); // Ref for the search bar
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!showAddBrand && !editingRow && searchInputRef.current) {
+      searchInputRef.current.focus(); // Focus the search bar when switching back to the brand list
+    }
+  });
 
   // Focus on the search bar when the component mounts
   useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/brand");
+        console.log(response.data);
+        setBrandsData(response.data); // Store the fetched brands in state
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching brands:", err.response?.data || err.message);
+        setError("Failed to fetch brands. Please try again.");
+        setLoading(false);
+      }
+    };
+
+    fetchBrands();
     searchInputRef.current?.focus();
   }, []);
+
+  if (loading) {
+    return <p>Loading brands...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   // Filter brands based on search term
   const filteredBrands = brandsData.filter((brand) =>
@@ -35,6 +66,11 @@ export default function BrandsList() {
         ? prevSelected.filter((rowId) => rowId !== id) // Unselect if already selected
         : [...prevSelected, id] // Select the row
     );
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRow(null); // Exit edit mode
+    setEditedData({}); // Clear edited data
   };
 
   // Handle "Select All" checkbox
@@ -56,29 +92,71 @@ export default function BrandsList() {
   // Handle editing a brand
   const handleEdit = (id) => {
     setEditingRow(id);
-    const brandToEdit = brandsData.find((brand) => brand.id === id);
+    const brandToEdit = brandsData.find((brand) => brand._id === id);
     setEditedData(brandToEdit);
   };
 
   // Handle saving edited brand data
-  const handleSave = (id) => {
-    setBrandsData((prevBrands) =>
-      prevBrands.map((brand) =>
-        brand.id === id ? { ...brand, ...editedData } : brand
-      )
-    );
-    setEditingRow(null);
+  const handleUpdate = async (id) => {
+    try {
+      // Prepare the payload with the edited data
+      const payload = {
+        name: editedData.name,
+        gst_rate: editedData.gst_rate,
+        available_prices: Array.isArray(editedData.available_prices)
+          ? editedData.available_prices // Use as-is if it's already an array
+          : editedData.available_prices.split(",").map((price) => price.trim()), // Convert string to array
+      };
+  
+      console.log("Payload being sent:", payload);
+  
+      // Make PUT request to the backend
+      const response = await axios.put(`http://localhost:3000/api/brand/update/${id}`, payload);
+  
+      alert("Brand updated successfully!");
+  
+      // Update the brandsData state with the updated brand
+      setBrandsData((prevBrands) =>
+        prevBrands.map((brand) =>
+          brand._id === id ? { ...brand, ...payload } : brand
+        )
+      );
+  
+      // Exit edit mode
+      setEditingRow(null);
+      setEditedData({});
+    } catch (error) {
+      console.error("Error updating brand:", error.response?.data || error.message);
+      alert("Failed to update brand. Please try again.");
+    }
   };
 
   // Handle deleting a brand
-  const handleDelete = (id) => {
-    setBrandsData((prevBrands) => prevBrands.filter((brand) => brand.id !== id));
-    setSelectedRows((prevSelected) => prevSelected.filter((rowId) => rowId !== id));
+  const handleDelete = async (id) => {
+    try {
+      // Make DELETE request to the backend
+      const response = await axios.delete(`http://localhost:3000/api/brand/delete/${id}`);
+      alert("Brand deleted successfully!");
+      console.log("Response from backend:", response.data);
+  
+      // Update the brandsData state to remove the deleted brand
+      setBrandsData((prevBrands) => prevBrands.filter((brand) => brand._id !== id));
+  
+      // Update the selectedRows state to remove the deleted brand's ID
+      setSelectedRows((prevSelected) => prevSelected.filter((rowId) => rowId !== id));
+    } catch (error) {
+      console.error("Error deleting brand:", error.response?.data || error.message);
+      alert("Failed to delete brand. Please try again.");
+    }
   };
 
   // Handle input change for editing
   const handleInputChange = (e, field) => {
-    setEditedData({ ...editedData, [field]: e.target.value });
+    const value = e.target.value;
+    setEditedData({
+      ...editedData,
+      [field]: field === "available_prices" ? value.split(",").map((v) => v.trim()) : value, // Convert string to array for available_prices
+    });
   };
 
   return (
@@ -147,26 +225,24 @@ export default function BrandsList() {
                     className="w-4 h-4"
                   />
                 </TableHead>
-                <TableHead>ID</TableHead>
                 <TableHead>Brand Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>GST Rate</TableHead>
+                <TableHead>Available Pricings</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredBrands.map((brand) => (
-                <TableRow key={brand.id} className={selectedRows.includes(brand.id) ? "bg-gray-100" : ""}>
+                <TableRow key={brand._id} className={selectedRows.includes(brand._id) ? "bg-gray-100" : ""}>
                   <TableCell>
                     <input
                       type="checkbox"
-                      checked={selectedRows.includes(brand.id)}
-                      onChange={() => handleRowSelect(brand.id)}
+                      checked={selectedRows.includes(brand._id)}
+                      onChange={() => handleRowSelect(brand._id)}
                       className="w-4 h-4"
                     />
                   </TableCell>
-                  {editingRow === brand.id ? (
+                  {editingRow === brand._id ? (
                     <>
-                      <TableCell>{brand.id}</TableCell>
                       <TableCell>
                         <input
                           type="text"
@@ -177,35 +253,42 @@ export default function BrandsList() {
                       </TableCell>
                       <TableCell>
                         <input
-                          type="text"
-                          value={editedData.category}
-                          onChange={(e) => handleInputChange(e, "category")}
+                          type="test"
+                          value={editedData.gst_rate}
+                          onChange={(e) => handleInputChange(e, "gst_rate")}
                           className="border rounded p-1"
                         />
                       </TableCell>
                       <TableCell>
-                        <input
-                          type="text"
-                          value={editedData.status}
-                          onChange={(e) => handleInputChange(e, "status")}
-                          className="border rounded p-1"
-                        />
+                      <input
+                        type="text"
+                        value={Array.isArray(editedData.available_prices) ? editedData.available_prices.join(", ") : ""} // Ensure it's a string
+                        onChange={(e) => handleInputChange(e, "available_prices")}
+                        className="border rounded p-1"
+                      />
                       </TableCell>
                       <TableCell>
-                        <Button
-                          className="bg-green-500 hover:bg-green-600 text-white"
-                          onClick={() => handleSave(brand.id)}
-                        >
-                          Save
-                        </Button>
+                        <div className="flex gap-2">                        
+                          <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                            onClick={() => handleUpdate(brand._id)}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                              className="bg-gray-500 hover:bg-gray-600 text-white"
+                              onClick={handleCancelEdit}
+                            >
+                              Cancel
+                            </Button>
+                        </div>
                       </TableCell>
                     </>
                   ) : (
                     <>
-                      <TableCell>{brand.id}</TableCell>
                       <TableCell>{brand.name}</TableCell>
-                      <TableCell>{brand.category}</TableCell>
-                      <TableCell>{brand.status}</TableCell>
+                      <TableCell>{brand.gst_rate}</TableCell>
+                      <TableCell>{brand.available_prices?.join(", ") || "N/A"}</TableCell>
                     </>
                   )}
                 </TableRow>

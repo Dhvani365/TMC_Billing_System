@@ -1,5 +1,5 @@
 import express from "express";
-import { getSKUs, getSKUById, addSKU, updateSKU, deleteSKU , getSKUsByCatalog, updateSKUImage } from "../controllers/sku.controller.js";
+import { getSKUById, addSKU, updateSKU, deleteSKU , getSKUsByCatalog, updateSKUImage } from "../controllers/sku.controller.js";
 import upload from "../middlewares/upload.middleware.js"
 
 const router = express.Router();

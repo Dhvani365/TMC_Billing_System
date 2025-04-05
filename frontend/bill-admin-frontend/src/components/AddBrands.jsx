@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function AddBrands() {
   const navigate = useNavigate();
@@ -33,13 +34,37 @@ function AddBrands() {
     setFormData((prevData) => ({
       ...prevData,
       gstOption: value,
-      gst: value === 'Other' ? '' : value, // Reset GST if "Other" is selected
+      gst: value === "Other" ? "" : value, // Reset GST if "Other" is selected
     }));
   };
-
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Brand Added:', formData);
+  
+    try {
+      // Prepare the payload
+      const payload = {
+        name: formData.brandName,
+        gst_rate: formData.gstOption === "Other" ? formData.gst : formData.gstOption, // Use custom GST if "Other" is selected
+        available_prices: Object.keys(formData.pricing).filter(
+          (key) => formData.pricing[key]
+        ), // Include only selected pricing options
+      };
+  
+      console.log("Payload being sent:", payload);
+  
+      // Make POST request to the backend
+      const response = await axios.post("http://localhost:3000/api/brand/add", payload);
+  
+      alert("Brand added successfully!");
+      console.log("Response from backend:", response.data);
+  
+      // Navigate to the Brands List page
+      navigate("/view-brands");
+    } catch (error) {
+      console.error("Error adding brand:", error.response?.data || error.message);
+      alert("Failed to add brand. Please try again.");
+    }
   };
 
   return (

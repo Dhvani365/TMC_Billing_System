@@ -10,4 +10,4 @@ const SkuSchema = new mongoose.Schema({
     image: { data: Buffer, contentType: String }, // Stores image as binary data
 });
 
-export default mongoose.model('SKU', SkuSchema);
+export default mongoose.model('SKU', SkuSchema); // Use 'SKU' as the model name

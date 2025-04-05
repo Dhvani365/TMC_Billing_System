@@ -1,5 +1,5 @@
 import express from "express";
-import { getCatalogs, getCatalogById, addCatalog, updateCatalog, deleteCatalog ,getCatalogsByBrand } from "../controllers/catalog.controller.js";
+import { getCatalogById, addCatalog, updateCatalog, deleteCatalog ,getCatalogsByBrand } from "../controllers/catalog.controller.js";
 
 const router = express.Router();
 

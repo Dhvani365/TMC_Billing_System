@@ -1,5 +1,5 @@
 import express from "express";
-import { getBrands, getBrandById, addBrand, updateBrand, deleteBrand,updateBrandImage } from "../controllers/brand.controller.js";
+import { getBrands, getBrandById, addBrand, updateBrand, deleteBrand } from "../controllers/brand.controller.js";
 import upload from "../middlewares/upload.middleware.js"
 
 const router = express.Router();
