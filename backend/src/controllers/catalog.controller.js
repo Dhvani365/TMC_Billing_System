@@ -14,7 +14,7 @@ import skuModel from '../models/sku.model.js';
 
 export const getCatalogsByBrand = async (req, res) => {
     try {
-      const { id } = req.params.id;
+      const  id  = req.params.id;
       const catalogs = await Catalog.find({ brand: id }).populate('brand'); // Assuming brand is stored as an ObjectId
       res.status(200).json(catalogs);
     } catch (error) {
