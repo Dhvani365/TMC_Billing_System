@@ -33,7 +33,7 @@ export const getPartiesById = async (req, res) => {
             brand: rel.brand, // Includes all fields of the Brand model
             default_price: rel.default_price,
             discount: rel.discount,
-        }));
+        }));    
 
         // Return the party and its associated brands
         res.status(200).json({

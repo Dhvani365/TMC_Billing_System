@@ -391,6 +391,10 @@ const OrderPanel = () => {
           const pricingResponse = await axios.get(
             `${BACKEND_URL}/pricing/party/${selectedClient._id}/brand/${selectedBrand._id}/catalog/${selectedCatalog._id}`
           );
+
+          const brandResponse = await axios.get(
+            `${BACKEND_URL}/brand/${selectedBrand._id}`
+          );
           
           // Merge SKU and pricing data
           const mergedProducts = skuResponse.data.map(sku => {
@@ -401,10 +405,12 @@ const OrderPanel = () => {
               basePrice: pricingData.base_price,
               discountPercentage: pricingData.discount_percentage || 0,
               discountAmount: pricingData.discount_amount || 0,
-              priceType: pricingData.price_type
+              priceType: pricingData.price_type,
+              gst: brandResponse.data.gst_rate
+
             };
           });
-          
+          console.log(mergedProducts);
           setProducts(mergedProducts);
         } catch (error) {
           console.error("Error fetching products:", error);
