@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Modal from "./Modal";
 import axios from "axios";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Header = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -12,9 +13,9 @@ const Header = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/party");
-        
+        const response = await axios.get(`${BACKEND_URL}/party`);
         setClients(response.data);
+        // console.log(response.data);
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
@@ -26,7 +27,7 @@ const Header = () => {
   return (
     <header className="bg-[#F1F8E8] p-4 flex justify-between items-center">
       <h1 className="text-xl font-bold ">TMC Billing</h1>
-
+      
       {/* Show Selected Client */}
       {selectedClient && <span className="text-gray-800 font-semibold">{selectedClient.name}</span>}
 

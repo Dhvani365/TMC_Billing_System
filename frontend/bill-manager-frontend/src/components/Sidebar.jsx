@@ -4,6 +4,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { setSelectedBrand } from "@/store/brandSlice";
 import axios from "axios";
 import './Loader.css'; // Import the CSS file
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Sidebar = () => {
   const selectedClient = useSelector((state) => state.client.selectedClient);
@@ -25,10 +26,12 @@ const Sidebar = () => {
       if (selectedClient) {
         setLoadingBrands(true);
         try {
-          const response = await axios.get(`http://localhost:3000/api/partyBrand/${selectedClient._id}`);
+          const response = await axios.get(`${BACKEND_URL}/party/${selectedClient._id}`);
           console.log("Fetched brands:", response.data);
-          const extractedBrands = response.data.map((item) => item.brand); // Extract brand objects
+          const extractedBrands = response.data.relations.map((relation) => relation.brand);
           setBrands(extractedBrands);
+          // const extractedBrands = response.data.map((item) => item.brand); // Extract brand objects
+          // setBrands(extractedBrands);
         } catch (error) {
           console.error("Error fetching brands:", error);
           setBrands([]);

@@ -4,7 +4,7 @@ const SpecialDiscountSchema = new mongoose.Schema({
     party_id: { type: mongoose.Schema.Types.ObjectId, ref: "Party", required: true },
     brand_id: { type: mongoose.Schema.Types.ObjectId, ref: "Brand", required: true },
     catalog_id: { type: mongoose.Schema.Types.ObjectId, ref: "Catalog", required: true },
-    discount: { type: mongoose.Types.Decimal128, default: 0 },
+    discount: { type: Number, default: 0 },
     status: { type: Boolean, default: true }, // true = active, false = inactive
     price_type: { type: String, enum: ["WSR", "CP"], default: "WSR" },
     // event_name: { type: String, required: true },
