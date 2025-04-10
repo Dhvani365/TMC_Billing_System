@@ -1,12 +1,26 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MdDashboard } from "react-icons/md";
 import { BsApple, BsArchiveFill, BsBriefcaseFill, BsUiChecks } from "react-icons/bs";
-import { FaAddressCard , FaStar, FaTags  } from "react-icons/fa";
+import { FaAddressCard, FaStar, FaTags } from "react-icons/fa";
 
 const Sidebar = () => {
-  const [activeLink, setActiveLink] = useState("View Parties");
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current location
+  const [activeLink, setActiveLink] = useState("");
+
+  // Update activeLink based on the current path
+  useEffect(() => {
+    const pathToLabelMap = {
+      "/dashboard": "Dashboard",
+      "/client-profile": "View Parties",
+      "/view-brands": "View Brands",
+      "/view-catalogs": "View Catalogs",
+      "/special-discount": "Special Discount",
+      "/user-accounts": "User Accounts",
+    };
+    setActiveLink(pathToLabelMap[location.pathname] || ""); // Set active link based on the current path
+  }, [location.pathname]);
 
   const handleNavItemClick = (label, path) => {
     setActiveLink(label);
@@ -20,12 +34,18 @@ const Sidebar = () => {
         <FaStar />
         <span>TMC Admin</span>
       </div>
-      
+
       {/* User Profile */}
       <div className="flex flex-col items-center my-2">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="w-14 h-14 rounded-full border" />
-        <p className="text-sm font-semibold mt-2">Vinesh Ambani</p>
-        <p className="text-xs text-gray-500">CEO, TMC <span className="text-green-500">●</span></p>
+        <img
+          src="https://randomuser.me/api/portraits/men/32.jpg"
+          alt="Profile"
+          className="w-14 h-14 rounded-full border"
+        />
+        <p className="text-sm font-semibold mt-2">Hello TMC!</p>
+        <p className="text-xs text-gray-500">
+          CEO, TMC <span className="text-green-500">●</span>
+        </p>
       </div>
 
       <nav className="mt-4 space-y-4">
@@ -52,19 +72,19 @@ const Sidebar = () => {
           label="View Catalogs"
           active={activeLink === "View Catalogs"}
           onClick={() => handleNavItemClick("View Catalogs", "/view-catalogs")}
-        />      
+        />
         <NavItem
           icon={<FaTags />}
           label="Special Discount"
           active={activeLink === "Special Discount"}
           onClick={() => handleNavItemClick("Special Discount", "/special-discount")}
-        />  
+        />
         <NavItem
-          icon={<FaAddressCard  />}
+          icon={<FaAddressCard />}
           label="User Accounts"
           active={activeLink === "User Accounts"}
           onClick={() => handleNavItemClick("User Accounts", "/user-accounts")}
-        />  
+        />
       </nav>
     </div>
   );

@@ -6,10 +6,7 @@ const SpecialDiscountSchema = new mongoose.Schema({
     catalog_id: { type: mongoose.Schema.Types.ObjectId, ref: "Catalog", required: true },
     discount: { type: Number, default: 0 },
     status: { type: Boolean, default: true }, // true = active, false = inactive
-    price_type: { type: String, enum: ["WSR", "CP"], default: "WSR" },
-    // event_name: { type: String, required: true },
-    // start_date: { type: Date, required: true },
-    // end_date: { type: Date, required: true },
-},{ indexes: [{ unique: true, fields: { party_id: 1, brand_id: 1, catalog_id: 1, event_name: 1 } }] });
+    price_type: { type: String, enum: ["WSR", "CP", "Fixed Price"], default: "WSR" },
+},{ indexes: [{ unique: true, fields: { party_id: 1, brand_id: 1, catalog_id: 1, status: 1 } }] });
 
 export default mongoose.model("SpecialDiscount", SpecialDiscountSchema);
