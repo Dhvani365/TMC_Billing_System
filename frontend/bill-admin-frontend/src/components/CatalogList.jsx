@@ -1,115 +1,135 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-const brandsData = [
-  { id: 1, name: "Nike" },
-  { id: 2, name: "Adidas" },
-  { id: 3, name: "Puma" },
-];
-
-const catalogsData = [
-  { id: 1, brandId: 1, name: "Nike Summer Collection" },
-  { id: 2, brandId: 1, name: "Nike Winter Collection" },
-  { id: 3, brandId: 2, name: "Adidas Originals" },
-  { id: 4, brandId: 3, name: "Puma Sports" },
-];
-
-const skusData = {
-  1: [
-    { id: 101, name: "Nike Air Max", image: "https://via.placeholder.com/100", cpPrice: 150, wsrPrice: 120 },
-    { id: 102, name: "Nike Zoom", image: "https://via.placeholder.com/100", cpPrice: 180, wsrPrice: 140 },
-  ],
-  2: [
-    { id: 103, name: "Nike Jacket", image: "https://via.placeholder.com/100", cpPrice: 200, wsrPrice: 170 },
-  ],
-  3: [
-    { id: 104, name: "Adidas Superstar", image: "https://via.placeholder.com/100", cpPrice: 130, wsrPrice: 100 },
-    { id: 105, name: "Adidas Ultraboost", image: "https://via.placeholder.com/100", cpPrice: 190, wsrPrice: 160 },
-  ],
-  4: [
-    { id: 106, name: "Puma Running Shoes", image: "https://via.placeholder.com/100", cpPrice: 140, wsrPrice: 110 },
-  ],
-};
 
 export default function CatalogList() {
   const navigate = useNavigate();
+  const [brands, setBrands] = useState([]); // Store fetched brands
+  const [catalogs, setCatalogs] = useState([]); // Store fetched catalogs
+  const [skus, setSkus] = useState([]); // Store fetched SKUs
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedCatalog, setSelectedCatalog] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingSku, setEditingSku] = useState(null);
-  const [editedSku, setEditedSku] = useState({});
   const [selectedSkus, setSelectedSkus] = useState([]); // Track selected SKUs
+  const [editingSku, setEditingSku] = useState(null); // Track the SKU being edited
+  const [editedSkuData, setEditedSkuData] = useState({}); // Store edited SKU data
   const searchInputRef = useRef(null); // Ref for the search bar
 
-  const [catalogs, setCatalogs] = useState(catalogsData); // Manage catalogs state
-  const [skus, setSkus] = useState(skusData); // Manage SKUs state
+  // Focus on the search bar when it is rendered
+  useEffect(() => {
+    if (selectedCatalog && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [selectedCatalog]);
+  
+  // Fetch all brands on component mount
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/brand");
+        setBrands(response.data); // Populate brands dropdown
+      } catch (error) {
+        console.error("Error fetching brands:", error.response?.data || error.message);
+        alert("Failed to fetch brands. Please try again.");
+      }
+    };
 
-  // Filter catalogs based on selected brand
-  const filteredCatalogs = catalogs.filter((catalog) => catalog.brandId === Number(selectedBrand));
+    fetchBrands();
+  }, []);
 
-  // Get SKUs for the selected catalog
-  const catalogSkus = skus[selectedCatalog] || [];
+  // Fetch catalogs when a brand is selected
+  useEffect(() => {
+    if (selectedBrand) {
+      const fetchCatalogs = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/catalog/brandid/${selectedBrand}`);
+          setCatalogs(response.data); // Populate catalogs dropdown
+        } catch (error) {
+          console.error("Error fetching catalogs:", error.response?.data || error.message);
+          alert("Failed to fetch catalogs. Please try again.");
+        }
+      };
+
+      fetchCatalogs();
+    } else {
+      setCatalogs([]); // Clear catalogs if no brand is selected
+      setSkus([]); // Clear SKUs if no brand is selected
+    }
+  }, [selectedBrand]);
+
+  // Fetch SKUs when a catalog is selected
+  useEffect(() => {
+    if (selectedCatalog) {
+      const fetchSkus = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/sku/catalog/${selectedCatalog}`);
+          setSkus(response.data); // Populate SKUs
+        } catch (error) {
+          console.error("Error fetching SKUs:", error.response?.data || error.message);
+          alert("Failed to fetch SKUs. Please try again.");
+        }
+      };
+
+      fetchSkus();
+    } else {
+      setSkus([]); // Clear SKUs if no catalog is selected
+    }
+  }, [selectedCatalog]);
 
   // Filter SKUs based on search term
-  const filteredSKUs = catalogSkus.filter((sku) =>
-    sku.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSKUs = skus.filter((sku) =>
+    sku.sku_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle editing an SKU
-  const handleEditClick = (sku) => {
-    setEditingSku(sku.id);
-    setEditedSku({ ...sku });
-  };
-
-  // Handle saving the edited SKU
-  const handleSaveClick = () => {
-    const updatedSkus = catalogSkus.map((sku) =>
-      sku.id === editingSku ? { ...sku, ...editedSku } : sku
-    );
-    setSkus({ ...skus, [selectedCatalog]: updatedSkus });
-    setEditingSku(null);
-  };
-
-  // Handle selecting/deselecting an SKU
-  const handleSkuSelect = (skuId) => {
+  // Handle checkbox selection
+  const handleSkuSelect = (id) => {
     setSelectedSkus((prevSelected) =>
-      prevSelected.includes(skuId)
-        ? prevSelected.filter((id) => id !== skuId)
-        : [...prevSelected, skuId]
+      prevSelected.includes(id)
+        ? prevSelected.filter((skuId) => skuId !== id) // Unselect if already selected
+        : [...prevSelected, id] // Select the SKU
     );
   };
 
   // Handle exporting selected SKUs
   const handleExportSkus = () => {
-    const exportedData = catalogSkus.filter((sku) => selectedSkus.includes(sku.id));
+    const exportedData = skus.filter((sku) => selectedSkus.includes(sku._id));
     console.log("Exported SKUs Data:", exportedData);
     alert("Exported SKUs data has been logged to the console.");
   };
 
-  // Handle deleting selected SKUs
-  const handleDeleteSkus = () => {
-    const updatedSkus = catalogSkus.filter((sku) => !selectedSkus.includes(sku.id));
-    setSkus({ ...skus, [selectedCatalog]: updatedSkus });
-    setSelectedSkus([]); // Clear selected SKUs
-    alert("Selected SKUs have been deleted.");
+  // Handle editing a SKU
+  const handleEditSku = (id) => {
+    setEditingSku(id);
+    const skuToEdit = skus.find((sku) => sku._id === id);
+    setEditedSkuData(skuToEdit);
   };
 
-  // Handle deleting the selected catalog
-  const handleDeleteCatalog = () => {
-    const updatedCatalogs = catalogs.filter((catalog) => catalog.id !== Number(selectedCatalog));
-    const updatedSkus = { ...skus };
-    delete updatedSkus[selectedCatalog]; // Remove SKUs for the deleted catalog
-
-    setCatalogs(updatedCatalogs);
-    setSkus(updatedSkus);
-    setSelectedCatalog(""); // Reset selected catalog
-    alert("The selected catalog has been deleted.");
+  // Handle saving edited SKU data
+  const handleSaveSku = async (id) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/api/sku/update/${id}`, editedSkuData);
+      alert("SKU updated successfully!");
+      setSkus((prevSkus) =>
+        prevSkus.map((sku) => (sku._id === id ? { ...sku, ...editedSkuData } : sku))
+      );
+      setEditingSku(null);
+      setEditedSkuData({});
+    } catch (error) {
+      console.error("Error updating SKU:", error.response?.data || error.message);
+      alert("Failed to update SKU. Please try again.");
+    }
   };
 
-  // Focus on the search bar when a catalog is selected
-  const handleCatalogChange = (catalogId) => {
-    setSelectedCatalog(catalogId);
-    setTimeout(() => searchInputRef.current?.focus(), 0); // Focus on the search bar
+  // Handle deleting a SKU
+  const handleDeleteSku = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/sku/delete/${id}`);
+      alert("SKU deleted successfully!");
+      setSkus((prevSkus) => prevSkus.filter((sku) => sku._id !== id));
+    } catch (error) {
+      console.error("Error deleting SKU:", error.response?.data || error.message);
+      alert("Failed to delete SKU. Please try again.");
+    }
   };
 
   return (
@@ -130,8 +150,8 @@ export default function CatalogList() {
             }}
           >
             <option value="">-- Select Brand --</option>
-            {brandsData.map((brand) => (
-              <option key={brand.id} value={brand.id}>
+            {brands.map((brand) => (
+              <option key={brand._id} value={brand._id}>
                 {brand.name}
               </option>
             ))}
@@ -144,12 +164,12 @@ export default function CatalogList() {
           <select
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             value={selectedCatalog}
-            onChange={(e) => handleCatalogChange(e.target.value)}
+            onChange={(e) => setSelectedCatalog(e.target.value)}
             disabled={!selectedBrand}
           >
             <option value="">-- Select Catalog --</option>
-            {filteredCatalogs.map((catalog) => (
-              <option key={catalog.id} value={catalog.id}>
+            {catalogs.map((catalog) => (
+              <option key={catalog._id} value={catalog._id}>
                 {catalog.name}
               </option>
             ))}
@@ -177,84 +197,85 @@ export default function CatalogList() {
         </button>
       </div>
 
-      {/* Action Buttons */}
-      {selectedCatalog && (
-        <div className="flex gap-4 mb-4">
-          <button
-            onClick={handleDeleteCatalog}
-            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-          >
-            Delete Catalog
-          </button>
-          {selectedSkus.length > 0 && (
-            <button
-              onClick={handleDeleteSkus}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-            >
-              Delete Selected SKUs
-            </button>
-          )}
-          {/* Export Button */}
-        {selectedSkus.length > 0 && (
-          <button
-            onClick={handleExportSkus}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-900 transition"
-          >
-            Export SKUs Data
-          </button>
-        )}
-        </div>
-      )}      
+      {/* Export Button */}
+      {selectedSkus.length > 0 && (
+        <button
+          onClick={handleExportSkus}
+          className="bg-green-500 text-white px-4 py-2 mb-4 rounded-md hover:bg-green-600"
+        >
+          Export Selected SKUs
+        </button>
+      )}
 
       {/* Display SKUs */}
       {selectedCatalog && filteredSKUs.length > 0 ? (
         <div className="grid grid-cols-6 gap-4">
           {filteredSKUs.map((sku) => (
-            <div key={sku.id} className="border p-4 rounded-md shadow-md bg-white">
+            <div key={sku._id} className="border p-4 rounded-md shadow-md bg-white">
               <input
                 type="checkbox"
-                checked={selectedSkus.includes(sku.id)}
-                onChange={() => handleSkuSelect(sku.id)}
-                className="mb-2 h-4 w-4"
+                checked={selectedSkus.includes(sku._id)}
+                onChange={() => handleSkuSelect(sku._id)}
+                className="mb-2"
               />
-              <img src={sku.image} alt={sku.name} className="w-full h-24 object-cover mb-2 rounded-md" />
-              {editingSku === sku.id ? (
+              {editingSku === sku._id ? (
                 <>
                   <input
                     type="text"
-                    value={editedSku.name}
-                    onChange={(e) => setEditedSku({ ...editedSku, name: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    value={editedSkuData.sku_number}
+                    onChange={(e) =>
+                      setEditedSkuData({ ...editedSkuData, sku_number: e.target.value })
+                    }
+                    className="w-full p-1 border rounded mb-2"
                   />
                   <input
-                    type="number"
-                    value={editedSku.cpPrice}
-                    onChange={(e) => setEditedSku({ ...editedSku, cpPrice: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    type="text"
+                    value={editedSkuData.cp_price?.$numberDecimal}
+                    onChange={(e) =>
+                      setEditedSkuData({ ...editedSkuData, cp_price: e.target.value })
+                    }
+                    className="w-full p-1 border rounded mb-2"
                   />
                   <input
-                    type="number"
-                    value={editedSku.wsrPrice}
-                    onChange={(e) => setEditedSku({ ...editedSku, wsrPrice: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    type="text"
+                    value={editedSkuData.wsr_price?.$numberDecimal}
+                    onChange={(e) =>
+                      setEditedSkuData({ ...editedSkuData, wsr_price: e.target.value })
+                    }
+                    className="w-full p-1 border rounded mb-2"
                   />
                   <button
-                    onClick={handleSaveClick}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                    onClick={() => handleSaveSku(sku._id)}
+                    className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                   >
                     Save
                   </button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-lg font-semibold">{sku.name}</h3>
-                  <p className="text-sm text-gray-700">CP Price: <strong>${sku.cpPrice}</strong></p>
-                  <p className="text-sm text-gray-700">WSR Price: <strong>${sku.wsrPrice}</strong></p>
+                  <img
+                    src={sku.image || null}
+                    alt={sku.sku_number}
+                    className="w-full h-24 object-cover mb-2 rounded-md"
+                  />
+                  <h3 className="text-lg font-semibold">{sku.sku_number}</h3>
+                  <p className="text-sm text-gray-700">
+                    CP Price: <strong>${parseFloat(sku.cp_price?.$numberDecimal || sku.cp_price).toFixed(2)}</strong>
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    WSR Price: <strong>${parseFloat(sku.wsr_price?.$numberDecimal || sku.wsr_price).toFixed(2)}</strong>
+                  </p>
                   <button
-                    onClick={() => handleEditClick(sku)}
-                    className="bg-blue-500 text-white px-4 py-2 mt-2 rounded-md hover:bg-blue-600 transition"
+                    onClick={() => handleEditSku(sku._id)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
                   >
-                    Edit SKU
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSku(sku._id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  >
+                    Delete
                   </button>
                 </>
               )}

@@ -1,5 +1,6 @@
 import SKU from '../models/sku.model.js';
 import sharp from 'sharp';
+import mongoose from 'mongoose';
 
 // Update SKU Image
 export const updateSKUImage = async (req, res) => {
@@ -102,89 +103,125 @@ export const getSKUById = async (req, res) => {
     }
 };
 
-// Add new SKU
 export const addSKU = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+  
     try {
-        const { brand, catalog, sku_number, price } = req.body;
+  
+      // Proceed with processing the request body
+      const { brand, catalog } = req.body;
+  
+      // Parse SKUs from the request body
+        const { skus } = req.body;
 
-        let outputFormat = 'jpeg'; // Default to JPEG
-        let outputOptions = { quality: 80 };
-
-        if (req.file.mimetype === 'image/png') {
-            outputFormat = 'png';
-            outputOptions = { compressionLevel: 8 }; // PNG compression (0-9)
-        } 
-        else if (req.file.mimetype === 'image/webp') {
-            outputFormat = 'webp';
-            outputOptions = { quality: 80 };
+        if (!Array.isArray(skus)) {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "Invalid SKUs format" });
         }
 
-        const compressedImageBuffer = await sharp(req.file.buffer)
-            .resize({ width: 800, withoutEnlargement: true }) // Resize to lower resolution, don't enlarge small images
-            [outputFormat](outputOptions) // Use determined format and options
-            .toBuffer();
-            
-        const image = {
-            data: compressedImageBuffer,
-            contentType: `image/${outputFormat}`,
-        }
-
-
-        // Check if SKU number already exists
-        const existingSKU = await SKU.findOne({ sku_number });
-        if (existingSKU) {
-            return res.status(400).json({ message: "SKU number already exists" });
-        }
-
-        const newSKU = new SKU({
-            brand,
-            catalog,
-            sku_number,
-            price,
-            image
+        // Attach images to the corresponding SKUs if files exist
+        skus.forEach((sku, index) => {
+            const file = req.files.find((file) => file.fieldname === `skus[${index}][image]`);
+            if (file) {
+                sku.image = {
+                data: file.buffer,
+                contentType: file.mimetype,
+                };
+            }
         });
-
-        const savedSKU = await newSKU.save();
-        const populatedSKU = await savedSKU
-            .populate('brand', 'name')
-            .populate('catalog', 'name');
-
-        res.status(201).json(populatedSKU);
+  
+      // Attach images to the corresponding SKUs if files exist
+      req.files.forEach((file) => {
+        const match = file.fieldname.match(/^skus\[(\d+)\]\[image\]$/);
+        if (match) {
+          const index = parseInt(match[1], 10);
+          skus[index].image = {
+            data: file.buffer,
+            contentType: file.mimetype,
+          };
+        }
+      });
+  
+      // Validate and save each SKU
+      for (const sku of skus) {
+        if (!sku.sku_number || !sku.wsr_price || !sku.cp_price) {
+          await session.abortTransaction();
+          return res.status(400).json({ message: "Missing required fields for SKU" });
+        }
+  
+        const newSKU = new SKU({
+          brand,
+          catalog,
+          sku_number: sku.sku_number,
+          wsr_price: sku.wsr_price,
+          cp_price: sku.cp_price,
+          image: sku.image || { data: null, contentType: null },
+        });
+  
+        await newSKU.save({ session });
+      }
+  
+      await session.commitTransaction();
+      res.status(201).json({ message: "SKUs added successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Error creating SKU", error: error.message });
+        console.error("Error saving SKU:", error.message);
+        await session.abortTransaction();
+        return res.status(400).json({ message: "Error saving SKU", error: error.message });
+    } finally {
+      session.endSession();
     }
-};
+  };
 
 // Update SKU
 export const updateSKU = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const { brand, catalog, sku_number, price } = req.body;
+        const { brand, catalog, sku_number, cp_price, wsr_price } = req.body;
 
         // Check if new SKU number already exists for another SKU
         const existingSKU = await SKU.findOne({
+            _id: { $ne: req.params.id },
             sku_number,
-            _id: { $ne: req.params.id }
-        });
+            brand,
+            catalog,
+        }).session(session);
 
         if (existingSKU) {
-            return res.status(400).json({ message: "SKU number already exists" });
+            await session.abortTransaction();
+            return res.status(400).json({ message: "SKU number already exists for this brand and catalog" });
         }
 
+        // Update the SKU
         const updatedSKU = await SKU.findByIdAndUpdate(
             req.params.id,
-            { brand, catalog, sku_number, price },
-            { new: true, runValidators: true }
+            {
+                brand,
+                catalog,
+                sku_number,
+                cp_price: mongoose.Types.Decimal128.fromString(cp_price), // Save as Decimal128
+                wsr_price: mongoose.Types.Decimal128.fromString(wsr_price), // Save as Decimal128
+            },
+            { new: true, runValidators: true, session }
         )
             .populate('brand', 'name')
             .populate('catalog', 'name');
 
         if (!updatedSKU) {
+            await session.abortTransaction();
             return res.status(404).json({ message: "SKU not found" });
         }
 
+        await session.commitTransaction();
         res.status(200).json(updatedSKU);
     } catch (error) {
+        await session.abortTransaction();
+        console.error("Error updating SKU:", error.message);
         res.status(500).json({ message: "Error updating SKU", error: error.message });
+    } finally {
+        session.endSession();
     }
 };
 

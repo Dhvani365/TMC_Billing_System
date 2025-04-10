@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function AddCatalogs() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    brandName: '',
-    catalogName: '',
+    brandName: "",
+    catalogName: "",
     numberOfSKUs: 0,
     allSKUSamePrice: false,
-    gstRate: '',
+    gstRate: "",
     skus: [],
     samePrice: {
-      wsrPrice: '',
-      cpPrice: '',
+      wsrPrice: "",
+      cpPrice: "",
     },
   });
 
   const [brands, setBrands] = useState([]);
 
+  // Fetch brands from the backend
   useEffect(() => {
-    // Fetch brands from the database
-    setBrands(['Brand1', 'Brand2']);
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/brand");
+        setBrands(response.data); // Extract brand names
+      } catch (error) {
+        console.error("Error fetching brands:", error.response?.data || error.message);
+      }
+    };
+
+    fetchBrands();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
+    } else if (type === "number") {
+      setFormData({ ...formData, [name]: value ? parseInt(value, 10) : "" });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -34,41 +46,22 @@ function AddCatalogs() {
 
   const handleSKUsChange = (index, field, value) => {
     const updatedSKUs = [...formData.skus];
-  
-    // Update the specific field for the current SKU
     updatedSKUs[index] = { ...updatedSKUs[index], [field]: value };
-  
-    // If the SKU code is updated, adjust subsequent SKU codes
-    if (field === 'skuCode') {
-      const baseSKU = value.replace(/[^0-9]/g, ''); // Extract numeric part of the SKU code
-      let nextSKU = parseInt(baseSKU, 10) || 1; // Default to 1 if parsing fails
-  
-      updatedSKUs[index].skuCode = `SKU-${nextSKU}`; // Update the current SKU code
-  
-      // Update subsequent SKU codes
-      for (let i = index + 1; i < updatedSKUs.length; i++) {
-        nextSKU += 1;
-        updatedSKUs[i].skuCode = `SKU-${nextSKU}`;
-      }
-    }
-  
     setFormData({ ...formData, skus: updatedSKUs });
   };
 
   const handleNumberOfSKUsChange = (e) => {
-    const numberOfSKUs = parseInt(e.target.value, 10);
-
-    // Limit the number of SKUs to 20
+    const numberOfSKUs = parseInt(e.target.value, 10) || 0;
     if (numberOfSKUs > 20) {
-      alert('You can only add up to 20 SKUs.');
+      alert("You can only add up to 20 SKUs.");
       return;
     }
-
+  
     const skus = Array.from({ length: numberOfSKUs }, (_, index) => ({
       skuCode: `SKU-${index + 1}`,
-      image: '',
-      cpPrice: '',
-      wsrPrice: '',
+      image: null,
+      cpPrice: "",
+      wsrPrice: "",
     }));
     setFormData({ ...formData, numberOfSKUs, skus });
   };
@@ -77,7 +70,6 @@ function AddCatalogs() {
     const { name, value } = e.target;
     const updatedSamePrice = { ...formData.samePrice, [name]: value };
 
-    // Apply the same price to all SKUs if "All SKUs Same Price" is checked
     if (formData.allSKUSamePrice) {
       const updatedSKUs = formData.skus.map((sku) => ({
         ...sku,
@@ -90,16 +82,52 @@ function AddCatalogs() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Catalog Added:', formData);
+
+    try {
+      // Add catalog
+      const catalogResponse = await axios.post("http://localhost:3000/api/catalog/add", {
+        name: formData.catalogName,
+        brand: formData.brandName,
+        no_of_skus: formData.numberOfSKUs,
+      });
+
+      // console.log("Catalog ID:", catalogResponse.data._id);
+      const catalogId = catalogResponse.data._id;
+      // Add SKUs
+      const skuFormData = new FormData();
+      skuFormData.append("brand", formData.brandName);
+      skuFormData.append("catalog", catalogId);
+      formData.skus.forEach((sku, index) => {
+        if (!sku.skuCode || !sku.cpPrice || !sku.wsrPrice ) {
+          throw new Error(`Missing required fields for SKU at index ${index}`);
+        }
+        skuFormData.append(`skus[${index}][sku_number]`, sku.skuCode);
+        skuFormData.append(`skus[${index}][cp_price]`, sku.cpPrice);
+        skuFormData.append(`skus[${index}][wsr_price]`, sku.wsrPrice);
+        if (sku.image instanceof File) {
+          skuFormData.append(`skus[${index}][image]`, sku.image);
+        }
+      });
+
+      await axios.post("http://localhost:3000/api/sku/add", skuFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      alert("Catalog and SKUs added successfully!");
+      navigate("/view-catalogs");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error?.message || "An unexpected error occurred";
+      alert(`Failed to add catalog or SKUs: ${errorMessage}`);
+    }
   };
 
   return (
     <div className="flex flex-row h-screen">
       {/* Back to Catalogs Button */}
       <button
-        onClick={() => navigate('/view-catalogs')}
+        onClick={() => navigate("/view-catalogs")}
         className="absolute top-2 right-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-900 transition"
       >
         Back to Catalogs
@@ -110,23 +138,23 @@ function AddCatalogs() {
         <div className="flex flex-col bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Catalog</h2>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-600 mb-1">Brand Name</label>
-              <select
-                name="brandName"
-                value={formData.brandName}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              >
-                <option value="">Select Brand</option>
-                {brands.map((brand) => (
-                  <option key={brand} value={brand}>
-                    {brand}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Brand Name</label>
+            <select
+              name="brandName"
+              value={formData.brandName} // now just an ID string
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">Select Brand</option>
+              {brands.map((brand) => (
+                <option key={brand._id} value={brand._id}>
+                  {brand.name}
+                </option>
+              ))}
+            </select>
+          </div>
             <div className="mb-4">
               <label className="block text-gray-600 mb-1">Catalog Name</label>
               <input
@@ -200,7 +228,7 @@ function AddCatalogs() {
                 <input
                   type="text"
                   value={sku.skuCode}
-                  onChange={(e) => handleSKUsChange(index, 'skuCode', e.target.value)}
+                  onChange={(e) => handleSKUsChange(index, "skuCode", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
@@ -209,8 +237,7 @@ function AddCatalogs() {
                 <label className="block text-gray-600 mb-1">Image</label>
                 <input
                   type="file"
-                  value={sku.image}
-                  onChange={(e) => handleSKUsChange(index, 'image', e.target.value)}
+                  onChange={(e) => handleSKUsChange(index, "image", e.target.files[0])}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
@@ -220,9 +247,9 @@ function AddCatalogs() {
                 <input
                   type="number"
                   value={sku.cpPrice}
-                  onChange={(e) => handleSKUsChange(index, 'cpPrice', e.target.value)}
+                  onChange={(e) => handleSKUsChange(index, "cpPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  disabled={formData.allSKUSamePrice} // Disable if "All SKUs Same Price" is checked
+                  disabled={formData.allSKUSamePrice}
                   required
                 />
               </div>
@@ -231,9 +258,9 @@ function AddCatalogs() {
                 <input
                   type="number"
                   value={sku.wsrPrice}
-                  onChange={(e) => handleSKUsChange(index, 'wsrPrice', e.target.value)}
+                  onChange={(e) => handleSKUsChange(index, "wsrPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  disabled={formData.allSKUSamePrice} // Disable if "All SKUs Same Price" is checked
+                  disabled={formData.allSKUSamePrice}
                   required
                 />
               </div>
