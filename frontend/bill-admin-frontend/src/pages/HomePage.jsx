@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [combinedData, setCombinedData] = useState([]); // Store combined party and brand data
@@ -42,14 +43,20 @@ function HomePage() {
         }));
     
         setCombinedData(combined); // Update state with combined data
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching parties or brands data:", error);
+        setLoading(false);
       }
     };
 
     fetchPartiesAndBrands();
     searchInputRef.current?.focus();
   }, []);
+
+  if (loading) {
+    return <p>Loading Parties...</p>;
+  }
 
   const filteredParties = combinedData.filter((party) =>
     party.name.toLowerCase().includes(searchTerm.toLowerCase())

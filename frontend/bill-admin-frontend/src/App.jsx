@@ -8,7 +8,7 @@ import CatalogList from './components/CatalogList';
 import Layout from './Layout';
 import AddCatalogs from './components/AddCatalogs';
 import AddPricingForm from './components/AddPricingForm';
-import PartyDiscount from './components/PartyDiscount';
+import PartyDiscount from './components/AddPartyDiscount';
 import ViewUsers from './components/ViewUsers';
 import SpecialDiscountList from './components/SpecialDiscountList';
 

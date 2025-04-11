@@ -14,8 +14,11 @@ import skuModel from '../models/sku.model.js';
 
 export const getCatalogsByBrand = async (req, res) => {
     try {
-      const  id  = req.params.id;
-      const catalogs = await Catalog.find({ brand: id }).populate('brand'); // Assuming brand is stored as an ObjectId
+      const { id } = req.params;
+      const catalogs = await Catalog.find({ brand: id }).populate('brand');
+      if (catalogs.length === 0) {
+        return res.status(404).json({ message: "No catalogs found for this brand" });
+      }
       res.status(200).json(catalogs);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving catalogs", error });
@@ -38,7 +41,7 @@ export const getCatalogById = async (req, res) => {
 // Add new catalog
 export const addCatalog = async (req, res) => {
     try {
-        const { brand, name } = req.body;
+        const { brand, name, no_of_skus } = req.body;
 
         // Check if catalog already exists for the brand
         const existingCatalog = await Catalog.findOne({ brand, name });
@@ -46,10 +49,10 @@ export const addCatalog = async (req, res) => {
             return res.status(400).json({ message: "Catalog already exists for this brand" });
         }
 
-        const newCatalog = new Catalog({ brand, name });
+        const newCatalog = new Catalog({ brand, name, no_of_skus });
         const savedCatalog = await newCatalog.save();
-        
-        const populatedCatalog = await savedCatalog.populate('brand', 'name');
+        const populatedCatalog = await savedCatalog.populate('_id', 'brand');
+
         res.status(201).json(populatedCatalog);
     } catch (error) {
         res.status(500).json({ message: "Error creating catalog", error: error.message });
