@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs"
@@ -51,35 +52,62 @@ export const signup = async(req,res) => {
 
 }
 
-export const login = async (req,res) => {
+export const login = async (req, res) => {
+  try {
+    const token = req.cookies.jwt;
 
-    const { email, password} = req.body;
+    // 1. Auto-login with token if valid
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId).select("-password");
 
-    try {
-      const user = await User.findOne({
-        email : email
-        })
-      if (!user){
-        return res.status(400).json({message :"Invalid Credentials"})
+        if (!user) {
+          return res.status(401).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+          _id: user._id,
+          name: user.name,
+          message: "Auto-login successful",
+        });
+      } catch (err) {
+        console.log("Auto-login token error:", err.message);
+        // Continue to manual login fallback
       }
-      if (user != null)
-        {
-          if (await bcrypt.compareSync(password,user.password))
-            {
-              const token = generateToken(user._id, res)
-              res.status(201).json({
-                _id:user._id,
-                name: user.name,
-              })
-            } else {
-              return res.status(400).json({message :"Invalid Credentials"})
-            }
-          }
-    } catch (error) {
-      console.log("Error in login Controller ", error.message);
-      return res.status(500).json({message :"Internal Server Error"})
     }
-}
+
+    // 2. Manual login with credentials
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    generateToken(user._id, res);
+
+    return res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      message: "Login successful",
+    });
+
+  } catch (error) {
+    console.log("Login error:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 export const logout = (req,res) => {
     try {
@@ -91,11 +119,14 @@ export const logout = (req,res) => {
     }
 }
 
-export const checkAuth = (req,res) => {
-  try{
-    res.status(200).json(req.user);
-  } catch(error) {
-    console.log("Error in checkAuth Controller ", error.message);
-    return res.status(500).json({message :"Internal Server Error"})
+export const checkAuth = async (req, res) => {
+  const user = req.user; // set by protectRoute middleware
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-}
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    message: "Authenticated"
+  });
+};

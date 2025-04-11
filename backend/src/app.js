@@ -10,21 +10,27 @@ import partyBrandRoutes from "./routes/partyBrand.route.js"
 import pricingRoutes from "./routes/pricing.route.js"
 import skuRoutes from "./routes/sku.route.js"
 import specialDiscountRoutes from "./routes/specialdiscount.route.js"
+import cookieParser from 'cookie-parser'
+import {protectRoute} from './middlewares/auth.middleware.js'
 import {connectDb} from "./lib/db.js"
  
 dotenv.config({path : '../.env'});
 const PORT = process.env.PORT
 const FRONTEND_URL = process.env.FRONTEND_URL
+const FRONTEND_URL_2 = process.env.FRONTEND_URL_2
 const app = express();
 
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: [FRONTEND_URL,FRONTEND_URL_2],
     credentials: true
   } ));
 
 app.use(express.json());
+app.use(cookieParser())
 
 app.use("/api/auth",authRoutes);
+
+app.use(protectRoute)
 app.use("/api/brand",brandRoutes);
 app.use("/api/catalog",catalogRoutes);
 app.use("/api/discount",discountRoutes);

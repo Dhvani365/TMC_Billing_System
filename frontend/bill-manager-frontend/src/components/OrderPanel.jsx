@@ -351,7 +351,9 @@ const OrderPanel = () => {
       if (selectedBrand) {
         setLoadingCatalogs(true);
         try {
-          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${selectedBrand._id}`);
+          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${selectedBrand._id}`, {
+            withCredentials: true,
+          });
           setCatalogs(response.data);  
         } catch (error) {
           console.error("Error fetching catalogs:", error);
@@ -385,16 +387,22 @@ const OrderPanel = () => {
         setLoadingProducts(true);
         try {
           // Fetch basic SKU data
-          const skuResponse = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog._id}`);
+          const skuResponse = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog._id}`, {
+            withCredentials: true,
+          });
           
           // Fetch pricing data
           const pricingResponse = await axios.get(
             `${BACKEND_URL}/pricing/party/${selectedClient._id}/brand/${selectedBrand._id}/catalog/${selectedCatalog._id}`
-          );
+            , {
+              withCredentials: true,
+            });
 
           const brandResponse = await axios.get(
             `${BACKEND_URL}/brand/${selectedBrand._id}`
-          );
+            , {
+              withCredentials: true,
+            });
           
           // Merge SKU and pricing data
           const mergedProducts = skuResponse.data.map(sku => {
