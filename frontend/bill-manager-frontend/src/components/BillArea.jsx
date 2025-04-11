@@ -52,7 +52,7 @@ const BillArea = () => {
         <td>5%</td>
         <td>${item.quantity} Pcs</td>
         <td>₹${item.price}</td>
-        <td>${item.discountedPrice ? `₹${item.discountedPrice.toFixed(2)}` : '-'}</td>
+        <td>${item.discountedPrice ? `₹${item?.discountedPrice}` : '-'}</td>
         <td>₹${item.total}</td>
       </tr>
     `).join('');

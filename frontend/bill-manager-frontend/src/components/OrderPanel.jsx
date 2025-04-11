@@ -547,10 +547,11 @@ const OrderPanel = () => {
                     onKeyDown={(e) => handleProductKeyDown(e, index)}
                     onClick={() => setSelectedProduct(product)}
                   >
-                    <img src={`data:${product.image.contentType};base64,${arrayBufferToBase64(product.image.data.data)}`} alt={product.name} className="w-full h-32 object-cover rounded-md" />
+                    <img src={`data:${product?.image?.contentType};base64,${arrayBufferToBase64(product?.image?.data?.data)}`} alt={product.name} className="w-full h-32 object-cover rounded-md" />
                     <h3 className="text-sm font-bold mt-2">{product.name}</h3>
                     <p className="text-xs text-gray-500">SKU: {product.sku_number}</p>
-                    <p className="text-sm mt-1">Price: <b>₹{product.price}</b></p>
+                    <p className="text-sm mt-1">Base Price: <b>₹{product.basePrice}</b></p>
+                    <p className="text-sm mt-1">Discounted Price: <b>₹{product.price}</b></p>
                     {/* <p className="text-xs text-gray-500">({product.priceType})</p>
                     <p className="text-xs text-gray-500">Discount: {product.discountPercentage}%</p> */}
                   </div>
