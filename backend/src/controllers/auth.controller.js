@@ -11,7 +11,7 @@ export const signup = async(req,res) => {
     });
   }
   try {
-    if (password.length < 8){
+    if (password.length <= 6){
       return res.status(400).json({
         message: "Password must be greater than 6 Characters"
       });

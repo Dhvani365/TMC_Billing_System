@@ -44,15 +44,15 @@ const BillArea = () => {
     const printWindow = window.open('', '_blank');
     
     // Generate dynamic table rows from bill items
-    const billItemsRows = bill.map((item, index) => `
+    const billItemsRows = currentItems.map((item, index) => `
       <tr>
         <td>${index + 1}</td>
         <td>${item.productName}</td>
-        
+        <td></td>
         <td>5%</td>
         <td>${item.quantity} Pcs</td>
         <td>₹${item.price}</td>
-        <td>${item.discountedPrice ? `₹${item.discountedPrice}` : '-'}</td>
+        <td>${item.discountedPrice ? `₹${item?.discountedPrice}` : '-'}</td>
         <td>₹${item.total}</td>
       </tr>
     `).join('');
@@ -62,7 +62,41 @@ const BillArea = () => {
     const sgst = total * 0.025;
     const totalTax = cgst + sgst;
     const grandTotal = total + totalTax;
-  
+    
+    // Calculate round-off amount
+    const roundedGrandTotal = Math.round(grandTotal);
+    const roundOffAmount = (roundedGrandTotal - grandTotal).toFixed(2);
+
+    // Utility function to convert numbers to words, including fractional part
+    const numberToWords = (num) => {
+      const a = [
+        '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen',
+      ];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      const inWords = (n) => {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '');
+        if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' and ' + inWords(n % 100) : '');
+        if (n < 100000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + inWords(n % 1000) : '');
+        if (n < 10000000) return inWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 !== 0 ? ' ' + inWords(n % 100000) : '');
+        return inWords(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 !== 0 ? ' ' + inWords(n % 10000000) : '');
+      };
+
+      const integerPart = Math.floor(num);
+      const fractionalPart = Math.round((num - integerPart) * 100);
+
+      let result = inWords(integerPart);
+      if (fractionalPart > 0) {
+        result += ` and ${inWords(fractionalPart)} Paise`;
+      }
+      return result + ' Only';
+    };
+
+    // Inside handlePrint function
+    const amountChargeableInWords = numberToWords(roundedGrandTotal);
+    const taxAmountInWords = numberToWords(totalTax);
+
     const billContent = `
       <html>
       <head>
@@ -76,6 +110,7 @@ const BillArea = () => {
         .center { text-align: center; }
         .bold { font-weight: bold; }
         .left { text-align: left; vertical-align: top;}
+        .no-inner-border td { border-top: none; border-bottom: none; text-align: right; }  
         </style>
       </head>
       <body>
@@ -153,6 +188,18 @@ const BillArea = () => {
           </thead>
           <tbody>
             ${billItemsRows}
+            <tr class="no-inner-border">
+            <td colspan="7" class="total">CGST</td>
+            <td>₹${cgst.toFixed(2)}</td>
+            </tr>
+            <tr class="no-inner-border">
+              <td colspan="7" class="total">SGST</td>
+              <td>₹${sgst.toFixed(2)}</td>
+            </tr>
+            <tr class="no-inner-border">
+              <td colspan="7" class="total">Round Off</td>
+              <td>₹${roundOffAmount}</td>
+            </tr>
             <tr>
               <td colspan="7" class="total">Total Amount</td>
               <td>₹${total}</td>
@@ -162,7 +209,7 @@ const BillArea = () => {
         <!-- Tax Calculation -->
     <table>
         <tr>
-            <td colspan="9"><strong>Amount Chargeable (in words):</strong> INR------Only</td>
+            <td colspan="9"><strong>Amount Chargeable (in words):</strong> INR ${amountChargeableInWords}</td>
         </tr>
         <tr>
             <th colspan="4" rowspan="2">Taxable Value</th>
@@ -177,7 +224,7 @@ const BillArea = () => {
             <th>Rate</th>
         </tr>
         <tr>
-            <td class="center" colspan="4">₹${grandTotal.toFixed(2)}</td>
+            <td class="center" colspan="4">₹${total.toFixed(2)}</td>
             <td class="center">2.50%</td>
             <td class="center">₹${cgst.toFixed(2)}</td>
             <td class="center">2.50%</td>
@@ -185,7 +232,7 @@ const BillArea = () => {
             <td class="center">${totalTax.toFixed(2)}</td>
         </tr>
         <tr>
-            <td colspan="9"><strong>Tax Amount (in words):</strong> INR----- Only</td>
+            <td colspan="9"><strong>Tax Amount (in words):</strong> INR ${taxAmountInWords}</td>
         </tr>
     </table>
     
