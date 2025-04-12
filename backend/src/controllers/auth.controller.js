@@ -70,6 +70,8 @@ export const login = async (req,res) => {
               res.status(201).json({
                 _id:user._id,
                 name: user.name,
+                token,
+                role: user.role,
               })
             } else {
               return res.status(400).json({message :"Invalid Credentials"})
