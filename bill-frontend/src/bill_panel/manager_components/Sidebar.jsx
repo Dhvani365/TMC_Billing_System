@@ -26,7 +26,9 @@ const Sidebar = () => {
       if (selectedClient) {
         setLoadingBrands(true);
         try {
-          const response = await axios.get(`${BACKEND_URL}/party/${selectedClient._id}`);
+          const response = await axios.get(`${BACKEND_URL}/party/${selectedClient._id}`, {
+            withCredentials: true,
+          });
           console.log("Fetched brands:", response.data);
           const extractedBrands = response.data.relations.map((relation) => relation.brand);
           setBrands(extractedBrands);

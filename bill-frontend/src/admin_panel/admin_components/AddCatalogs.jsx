@@ -298,7 +298,7 @@ function AddCatalogs() {
                   onChange={(e) => handleSKUsChange(index, "wsrPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}
-                  required
+                  
                 />
               </div>
               <div className="mb-1 text-sm">
@@ -309,7 +309,7 @@ function AddCatalogs() {
                   onChange={(e) => handleSKUsChange(index, "cpPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}
-                  required
+                  
                 />
               </div>
             </div>

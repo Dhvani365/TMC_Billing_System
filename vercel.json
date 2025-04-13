@@ -16,5 +16,7 @@
       "dest": "bill-frontend/dist/index.html"
     }
   ],
+  "outputDirectory": "bill-frontend/dist",
+  "installCommand": "npm install --prefix backend && npm install --prefix bill-frontend",
   "buildCommand": "npm install --prefix backend && npm install --prefix bill-frontend && npm run build --prefix bill-frontend"
 }

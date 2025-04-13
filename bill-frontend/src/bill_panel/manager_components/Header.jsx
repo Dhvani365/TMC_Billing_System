@@ -13,7 +13,9 @@ const Header = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/party`);
+        const response = await axios.get(`${BACKEND_URL}/party`, {
+          withCredentials: true,
+        });
         setClients(response.data);
         // console.log(response.data);
       } catch (error) {
