@@ -1,16 +1,20 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "backend/app.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "backend/app.js"
-      }
-    ],
-    "buildCommand": "npm install --prefix backend && npm install --prefix bill-frontend && npm run build --prefix bill-frontend"
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/src/app.js",
+      "use": "@vercel/node"
+    }
+  ],
+ "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/src/app.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "bill-frontend/dist/index.html"
+    }
+  ],
+  "buildCommand": "npm install --prefix backend && npm install --prefix bill-frontend && npm run build --prefix bill-frontend"
+}

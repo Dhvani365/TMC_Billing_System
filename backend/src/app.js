@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.route.js"
 import brandRoutes from "./routes/brand.route.js"
@@ -18,18 +17,10 @@ const PORT = process.env.PORT
 const FRONTEND_URL = process.env.FRONTEND_URL
 const app = express();
 
-// app.use(cors({
-//     origin: FRONTEND_URL,
-//     credentials: true
-//   } ));
-
-// Serve the static files from the React app
-app.use(express.static(path.join(__dirname, '../bill-frontend/dist')));
-
-// Handle requests by serving index.html for all routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../bill-frontend/dist', 'index.html'));
-});
+app.use(cors({
+    origin: FRONTEND_URL,
+    credentials: true
+  } ));
 
 app.use(express.json());
 
