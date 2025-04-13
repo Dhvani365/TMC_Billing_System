@@ -3,6 +3,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from ".
 import { Button } from "../admin_components/ui/button";
 import AddBrands from "./AddBrands";
 import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // const initialBrandsData = [
 //   { id: 1, name: "Nike", category: "Sportswear", status: "Active" },
@@ -31,7 +32,7 @@ export default function BrandsList() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/brand");
+        const response = await axios.get(`${BACKEND_URL}/brand`);
         console.log(response.data);
         setBrandsData(response.data); // Store the fetched brands in state
         setLoading(false);
@@ -44,7 +45,7 @@ export default function BrandsList() {
 
     fetchBrands();
     searchInputRef.current?.focus();
-  }, []);
+  }, [showAddBrand, editingRow]); // Fetch brands when showAddBrand or editingRow changes
 
   if (loading) {
     return <p>Loading brands...</p>;
@@ -111,7 +112,7 @@ export default function BrandsList() {
       console.log("Payload being sent:", payload);
   
       // Make PUT request to the backend
-      const response = await axios.put(`http://localhost:3000/api/brand/update/${id}`, payload);
+      const response = await axios.put(`${BACKEND_URL}/brand/update/${id}`, payload);
   
       alert("Brand updated successfully!");
   
@@ -135,7 +136,7 @@ export default function BrandsList() {
   const handleDelete = async (id) => {
     try {
       // Make DELETE request to the backend
-      const response = await axios.delete(`http://localhost:3000/api/brand/delete/${id}`);
+      const response = await axios.delete(`${BACKEND_URL}/brand/delete/${id}`);
       alert("Brand deleted successfully!");
       console.log("Response from backend:", response.data);
   
@@ -187,7 +188,11 @@ export default function BrandsList() {
 
       {/* Show Add Brand Form OR Table */}
       {showAddBrand ? (
-        <AddBrands />
+        <AddBrands 
+          onSave={() => {
+            setShowAddBrand(false); // Hide the form after saving
+          }}
+        />
       ) : (
         <>
           {selectedRows.length > 0 && (

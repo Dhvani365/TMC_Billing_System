@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -16,7 +17,7 @@ const SignupPage = () => {
     e.preventDefault();
     setError(''); // Clear previous error message
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/signup', formData, { withCredentials: true });
+      const response = await axios.post(`${BACKEND_URL}/auth/signup`, formData, { withCredentials: true });
       console.log('Signup successful:', response.data);
       navigate('/'); // Redirect to LoginPage on successful signup
     } catch (error) {

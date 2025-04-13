@@ -3,6 +3,7 @@ import { Button } from "../admin_components/ui/button";
 import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from "../admin_components/ui/table";
 import axios from "axios"; // Import axios for API requests
 import { useNavigate } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function HomePage() {
   const navigate = useNavigate();
@@ -19,12 +20,12 @@ function HomePage() {
     const fetchPartiesAndBrands = async () => {
       try {
         // Fetch all parties
-        const partyResponse = await axios.get("http://localhost:3000/api/party");
+        const partyResponse = await axios.get(`${BACKEND_URL}/party`);
         const partiesData = partyResponse.data;
     
         // Fetch brands for each party using their IDs
         const brandRequests = partiesData.map((party) =>
-          axios.get(`http://localhost:3000/api/party/${party._id}`)
+          axios.get(`${BACKEND_URL}/party/${party._id}`)
         );
     
         const brandResponses = await Promise.all(brandRequests);
@@ -52,7 +53,7 @@ function HomePage() {
 
     fetchPartiesAndBrands();
     searchInputRef.current?.focus();
-  }, []);
+  }, [editingRowId, editedRowData]);
 
   if (loading) {
     return <p>Loading Parties...</p>;
@@ -117,7 +118,7 @@ function HomePage() {
       });
   
       // Make API call to update the party
-      const response = await axios.put(`http://localhost:3000/api/party/update/${editingRowId}`, {
+      const response = await axios.put(`${BACKEND_URL}/party/update/${editingRowId}`, {
         name,
         gst_no,
         address,
@@ -163,7 +164,7 @@ function HomePage() {
 
       // Make DELETE requests for each selected party
       for (const partyId of selectedRows) {
-        await axios.delete(`http://localhost:3000/api/party/delete/${partyId}`);
+        await axios.delete(`${BACKEND_URL}/party/delete/${partyId}`);
       }
 
       // Remove deleted parties from the state

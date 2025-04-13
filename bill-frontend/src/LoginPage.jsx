@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -32,7 +33,7 @@ const LoginPage = () => {
     // }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', formData, { withCredentials: true });
+      const response = await axios.post(`${BACKEND_URL}/auth/login`, formData, { withCredentials: true });
       const { name, _id, token, role } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("username", name);

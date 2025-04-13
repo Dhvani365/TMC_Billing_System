@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-function AddBrands() {
+function AddBrands({onSave}) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     brandName: '',
@@ -51,19 +52,16 @@ function AddBrands() {
         ), // Include only selected pricing options
       };
   
-      console.log("Payload being sent:", payload);
-  
       // Make POST request to the backend
-      const response = await axios.post("http://localhost:3000/api/brand/add", payload);
+      const response = await axios.post(`${BACKEND_URL}/brand/add`, payload);
   
       alert("Brand added successfully!");
-      console.log("Response from backend:", response.data);
   
       // Navigate to the Brands List page
-      navigate("/home/view-brands");
+      onSave();
     } catch (error) {
-      console.error("Error adding brand:", error.response?.data || error.message);
-      alert("Failed to add brand. Please try again.");
+      console.error("Error adding brand:", error?.response?.data?.message || error?.message);
+      alert("Failed to add brand: "+error?.response?.data?.message || error?.message);
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function CatalogList() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function CatalogList() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/brand");
+        const response = await axios.get(`${BACKEND_URL}/brand`);
         setBrands(response.data); // Populate brands dropdown
       } catch (error) {
         console.error("Error fetching brands:", error.response?.data || error.message);
@@ -42,7 +43,11 @@ export default function CatalogList() {
     if (selectedBrand) {
       const fetchCatalogs = async () => {
         try {
-          const response = await axios.get(`http://localhost:3000/api/catalog/brandid/${selectedBrand}`);
+          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${selectedBrand}`);
+          if(response.status == 201){
+            setCatalogs([]);
+            return;
+          }
           setCatalogs(response.data); // Populate catalogs dropdown
         } catch (error) {
           console.error("Error fetching catalogs:", error.response?.data || error.message);
@@ -62,7 +67,7 @@ export default function CatalogList() {
     if (selectedCatalog) {
       const fetchSkus = async () => {
         try {
-          const response = await axios.get(`http://localhost:3000/api/sku/catalog/${selectedCatalog}`);
+          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`);
           setSkus(response.data); // Populate SKUs
         } catch (error) {
           console.error("Error fetching SKUs:", error.response?.data || error.message);
@@ -107,7 +112,7 @@ export default function CatalogList() {
   // Handle saving edited SKU data
   const handleSaveSku = async (id) => {
     try {
-      const response = await axios.put(`http://localhost:3000/api/sku/update/${id}`, editedSkuData);
+      const response = await axios.put(`${BACKEND_URL}/sku/update/${id}`, editedSkuData);
       alert("SKU updated successfully!");
       setSkus((prevSkus) =>
         prevSkus.map((sku) => (sku._id === id ? { ...sku, ...editedSkuData } : sku))
@@ -123,13 +128,35 @@ export default function CatalogList() {
   // Handle deleting a SKU
   const handleDeleteSku = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/sku/delete/${id}`);
+      await axios.delete(`${BACKEND_URL}/sku/delete/${id}`);
       alert("SKU deleted successfully!");
       setSkus((prevSkus) => prevSkus.filter((sku) => sku._id !== id));
     } catch (error) {
       console.error("Error deleting SKU:", error.response?.data || error.message);
       alert("Failed to delete SKU. Please try again.");
     }
+  };
+
+  // Handle deleting a catalog
+  const handleDeleteCatalog = async (id) => {
+    try {
+      await axios.delete(`${BACKEND_URL}/catalog/delete/${id}`);
+      alert("Catalog deleted successfully!");
+      setCatalogs((prevCatalogs) => prevCatalogs.filter((catalog) => catalog._id !== id));
+      setSelectedCatalog(""); // Reset selected catalog
+    } catch (error) {
+      console.error("Error deleting catalog:", error.response?.data || error.message);
+      alert("Failed to delete catalog. Please try again.");
+    }
+  };
+
+  // Navigate to Add Catalog form with pre-filled brand and catalog
+  const handleAddSku = () => {
+    navigate("/home/add-catalog", {
+      state: {
+        preselectedBrand: selectedBrand,
+      },
+    });
   };
 
   return (
@@ -158,24 +185,6 @@ export default function CatalogList() {
           </select>
         </div>
 
-        {/* Catalog Dropdown */}
-        <div className="flex-1">
-          <label className="block text-sm font-semibold mb-2">Select Catalog</label>
-          <select
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            value={selectedCatalog}
-            onChange={(e) => setSelectedCatalog(e.target.value)}
-            disabled={!selectedBrand}
-          >
-            <option value="">-- Select Catalog --</option>
-            {catalogs.map((catalog) => (
-              <option key={catalog._id} value={catalog._id}>
-                {catalog.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Search Bar */}
         {selectedCatalog && (
           <div className="mt-7">
@@ -196,6 +205,59 @@ export default function CatalogList() {
           + Add Catalog
         </button>
       </div>
+
+      {selectedBrand && catalogs.length === 0 && (
+        <div className="mb-6">
+          <p className="text-gray-500">No Catalogs available for this brand.</p>
+        </div>
+      )}
+      {/* Catalog Table */}
+      {selectedBrand && catalogs.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Catalogs</h2>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2">Catalog Name</th>
+                <th className="border border-gray-300 p-2">Number of SKUs</th>
+                <th className="border border-gray-300 p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {catalogs.map((catalog) => (
+                <tr key={catalog._id}>
+                  <td className="border border-gray-300 p-2">{catalog.name}</td>
+                  <td className="border border-gray-300 p-2">{catalog.no_of_skus}</td>
+                  <td className="border border-gray-300 p-2">
+                    <button
+                      onClick={() => setSelectedCatalog(catalog._id)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mr-2"
+                    >
+                      View SKUs
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCatalog(catalog._id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Add SKU Button */}
+      {selectedCatalog && (
+        <button
+          onClick={handleAddSku}
+          className="bg-green-400 text-white px-4 py-2 mb-4 rounded-md hover:bg-green-600"
+        >
+          + Add SKU
+        </button>
+      )}
 
       {/* Export Button */}
       {selectedSkus.length > 0 && (
@@ -230,17 +292,17 @@ export default function CatalogList() {
                   />
                   <input
                     type="text"
-                    value={editedSkuData.cp_price?.$numberDecimal}
+                    value={editedSkuData.wsr_price?.$numberDecimal || editedSkuData.wsr_price || ""}
                     onChange={(e) =>
-                      setEditedSkuData({ ...editedSkuData, cp_price: e.target.value })
+                      setEditedSkuData({ ...editedSkuData, wsr_price: String(e.target.value) })
                     }
                     className="w-full p-1 border rounded mb-2"
                   />
                   <input
                     type="text"
-                    value={editedSkuData.wsr_price?.$numberDecimal}
+                    value={editedSkuData.cp_price?.$numberDecimal || editedSkuData.cp_price || ""}
                     onChange={(e) =>
-                      setEditedSkuData({ ...editedSkuData, wsr_price: e.target.value })
+                      setEditedSkuData({ ...editedSkuData, cp_price: String(e.target.value) })
                     }
                     className="w-full p-1 border rounded mb-2"
                   />
@@ -260,10 +322,10 @@ export default function CatalogList() {
                   />
                   <h3 className="text-lg font-semibold">{sku.sku_number}</h3>
                   <p className="text-sm text-gray-700">
-                    CP Price: <strong>${parseFloat(sku.cp_price?.$numberDecimal || sku.cp_price).toFixed(2)}</strong>
+                    WSR Price: <strong>₹{parseFloat(sku.wsr_price?.$numberDecimal || sku.wsr_price).toFixed(2)}</strong>
                   </p>
                   <p className="text-sm text-gray-700">
-                    WSR Price: <strong>${parseFloat(sku.wsr_price?.$numberDecimal || sku.wsr_price).toFixed(2)}</strong>
+                    CP Price: <strong>₹{parseFloat(sku.cp_price?.$numberDecimal || sku.cp_price).toFixed(2)}</strong>
                   </p>
                   <button
                     onClick={() => handleEditSku(sku._id)}

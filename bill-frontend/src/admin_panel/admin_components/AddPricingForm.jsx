@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function AddPricingForm() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function AddPricingForm() {
     // Fetch brands from the backend
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/brand");
+        const response = await axios.get(`${BACKEND_URL}/brand`);
         setBrands(response.data); // Set the fetched brands in state
       } catch (error) {
         console.error("Error fetching brands:", error.response?.data || error.message);
@@ -72,7 +73,7 @@ function AddPricingForm() {
       console.log("Payload being sent:", payload);
 
       // Make POST request to the backend
-      await axios.post("http://localhost:3000/api/party/add", payload);
+      await axios.post(`${BACKEND_URL}/party/add`, payload);
 
       alert("Party and pricing details saved successfully!");
       navigate("/home/client-profile");

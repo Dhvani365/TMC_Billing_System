@@ -30,9 +30,9 @@ const Sidebar = () => {
   return (
     <div className="p-5 text-gray-700 font-sans">
       {/* Logo */}
-      <div className="flex items-center ml-6 space-x-2 text-green-500 font-bold text-lg">
-        <FaStar />
-        <span>TMC Admin</span>
+      <div className="flex items-justify ml-2 space-x-2 text-green-500 font-bold text-lg">
+        <FaStar className="mt-1"/>
+        <span>Girnar Fashion</span>
       </div>
 
       {/* User Profile */}
@@ -42,9 +42,9 @@ const Sidebar = () => {
           alt="Profile"
           className="w-14 h-14 rounded-full border"
         />
-        <p className="text-sm font-semibold mt-2">Hello TMC!</p>
+        <p className="text-sm font-semibold mt-2">Hello Girnar!</p>
         <p className="text-xs text-gray-500">
-          CEO, TMC <span className="text-green-500">●</span>
+          CEO, Girnar Fashion <span className="text-green-500">●</span>
         </p>
       </div>
 

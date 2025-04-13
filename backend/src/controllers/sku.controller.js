@@ -179,8 +179,7 @@ export const updateSKU = async (req, res) => {
     session.startTransaction();
 
     try {
-        const { brand, catalog, sku_number, cp_price, wsr_price } = req.body;
-
+        let { brand, catalog, sku_number, cp_price, wsr_price } = req.body;
         // Check if new SKU number already exists for another SKU
         const existingSKU = await SKU.findOne({
             _id: { $ne: req.params.id },
@@ -195,6 +194,12 @@ export const updateSKU = async (req, res) => {
         }
 
         // Update the SKU
+        if(typeof cp_price === 'object' || typeof cp_price !== 'string') {
+            cp_price = cp_price['$numberDecimal'].toString(); // Convert to string if not already
+        }
+        if(typeof wsr_price !== 'string' || typeof wsr_price === 'object') {
+            wsr_price = wsr_price['$numberDecimal'].toString(); // Convert to string if not already
+        }
         const updatedSKU = await SKU.findByIdAndUpdate(
             req.params.id,
             {

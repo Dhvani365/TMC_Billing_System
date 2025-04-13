@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function PartyDiscount({ onSaveSuccess }) {
   const navigate = useNavigate();
@@ -16,12 +17,12 @@ function PartyDiscount({ onSaveSuccess }) {
   const [parties, setParties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [availablePrices, setAvailablePrices] = useState([]); // To store available price types
   // Fetch brands from the backend
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/brand");
+        const response = await axios.get(`${BACKEND_URL}/brand`);
         setBrands(response.data);
       } catch (err) {
         setError("Failed to fetch brands. Please try again.");
@@ -36,8 +37,18 @@ function PartyDiscount({ onSaveSuccess }) {
     const fetchCatalogs = async () => {
       if (formData.brand_id) {
         try {
-          const response = await axios.get(`http://localhost:3000/api/catalog/brandid/${formData.brand_id}`);
+          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${formData.brand_id}`);
+          if(response.status !== 200) {
+            alert("Catalog Does not exists for this Brand! First Add catalogs!");
+            navigate("/home/add-catalog");
+          }
           setCatalogOptions(response.data);
+
+          // Get the selected brand's available prices
+          const selectedBrand = brands.find((brand) => brand._id === formData.brand_id);
+          if (selectedBrand) {
+            setAvailablePrices(selectedBrand.available_prices || []);
+          }
         } catch (err) {
           setError("Failed to fetch catalogs. Please try again.");
         }
@@ -53,7 +64,7 @@ function PartyDiscount({ onSaveSuccess }) {
   useEffect(() => {
     const fetchParties = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/party");
+        const response = await axios.get(`${BACKEND_URL}/party`);
         setParties(response.data);
       } catch (err) {
         setError("Failed to fetch parties. Please try again.");
@@ -77,13 +88,13 @@ function PartyDiscount({ onSaveSuccess }) {
         party_id: formData.party_id,
         brand_id: formData.brand_id,
         catalog_id: formData.catalog_id,
-        discount: formData.discount,
+        discount: formData?.discount || 0,
         price_type: formData.price_type,
         status: true, // Default status
       };
 
       // Add new special discount
-      await axios.post(`http://localhost:3000/api/specialdiscount/add`, specialDiscountData);
+      await axios.post(`${BACKEND_URL}/specialdiscount/add`, specialDiscountData);
       
       alert("Party discount added successfully!");
       if (onSaveSuccess) {
@@ -154,7 +165,7 @@ function PartyDiscount({ onSaveSuccess }) {
               ))}
             </select>
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-600 mb-1">Pricing Type</label>
             <div className="flex gap-4">
               {["WSR", "CP", "Fixed Price"].map((type) => (
@@ -171,7 +182,51 @@ function PartyDiscount({ onSaveSuccess }) {
                 </div>
               ))}
             </div>
+          </div> */}
+
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Pricing Type</label>
+            <div className="flex gap-4">
+              {availablePrices.includes("WSR") && (
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="price_type"
+                    value="WSR"
+                    checked={formData.price_type === "WSR"}
+                    onChange={(e) => setFormData({ ...formData, price_type: e.target.value })}
+                    className="mr-2 w-4 h-4"
+                  />
+                  <label>WSR</label>
+                </div>
+              )}
+              {availablePrices.includes("CP") && (
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="price_type"
+                    value="CP"
+                    checked={formData.price_type === "CP"}
+                    onChange={(e) => setFormData({ ...formData, price_type: e.target.value })}
+                    className="mr-2 w-4 h-4"
+                  />
+                  <label>CP</label>
+                </div>
+              )}
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="price_type"
+                  value="Fixed Price"
+                  checked={formData.price_type === "Both"}
+                  onChange={(e) => setFormData({ ...formData, price_type: e.target.value })}
+                  className="mr-2 w-4 h-4"
+                />
+                <label>Fixed Price</label>
+              </div>
+            </div>
           </div>
+          
           <div className="mb-4">
             <label className="block text-gray-600 mb-1">Fixed Discount (%)</label>
             <input

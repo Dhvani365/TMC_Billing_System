@@ -3,6 +3,7 @@ import axios from "axios";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../admin_components/ui/table";
 import { Button } from "../admin_components/ui/button";
 import PartyDiscount from "./AddPartyDiscount";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function SpecialDiscountList() {
   const [discountsData, setDiscountsData] = useState([]);
@@ -25,7 +26,7 @@ export default function SpecialDiscountList() {
   useEffect(() => {
     const fetchDiscounts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/specialdiscount");
+        const response = await axios.get(`${BACKEND_URL}/specialdiscount`);
         console.log(response.data);
         setDiscountsData(response.data);
         setFilteredDiscounts(response.data); // Initialize filtered data
@@ -70,7 +71,7 @@ export default function SpecialDiscountList() {
   // Handle deleting a discount
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/specialdiscount/delete/${id}`);
+      await axios.delete(`${BACKEND_URL}/specialdiscount/delete/${id}`);
       setFilteredDiscounts((prevDiscounts) => prevDiscounts.filter((discount) => discount._id !== id));
       setSelectedRows((prevSelected) => prevSelected.filter((rowId) => rowId !== id));
       alert("Discount deleted successfully!");
@@ -81,18 +82,39 @@ export default function SpecialDiscountList() {
 
   // Handle toggling discount status
   const handleToggleStatus = async (id) => {
-    const discountToToggle = discountsData.find((discount) => discount._id === id);
+    // Find the discount to toggle from the filteredDiscounts (which reflects the latest state)
+    const discountToToggle = filteredDiscounts.find((discount) => discount._id === id);
+  
+    if (!discountToToggle) {
+      alert("Discount not found.");
+      return;
+    }
+  
     try {
+      // Prepare the updated discount object with the latest values
       const updatedDiscount = {
         ...discountToToggle,
-        status: !discountToToggle.status,
+        status: !discountToToggle.status, // Toggle the status
       };
-      await axios.put(`http://localhost:3000/api/specialdiscount/update/${id}`, updatedDiscount);
+  
+      // Send the updated discount to the backend
+      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, updatedDiscount);
+  
+      // Update the state with the toggled status
       setFilteredDiscounts((prevDiscounts) =>
         prevDiscounts.map((discount) =>
-          discount._id === id ? { ...discount, status: !discount.status } : discount
+          discount._id === id ? { ...discount, status: updatedDiscount.status } : discount
         )
       );
+  
+      // Also update the original discountsData to keep it in sync
+      setDiscountsData((prevDiscounts) =>
+        prevDiscounts.map((discount) =>
+          discount._id === id ? { ...discount, status: updatedDiscount.status } : discount
+        )
+      );
+  
+      // alert("Discount status updated successfully!");
     } catch (err) {
       alert("Failed to update discount status. Please try again.");
     }
@@ -108,12 +130,20 @@ export default function SpecialDiscountList() {
   // Handle saving edited discount data
   const handleSave = async (id) => {
     try {
-      await axios.put(`http://localhost:3000/api/specialdiscount/update/${id}`, editedData);
+      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, editedData);
+  
+      // Update both filteredDiscounts and discountsData with the edited data
       setFilteredDiscounts((prevDiscounts) =>
         prevDiscounts.map((discount) =>
           discount._id === id ? { ...discount, ...editedData } : discount
         )
       );
+      setDiscountsData((prevDiscounts) =>
+        prevDiscounts.map((discount) =>
+          discount._id === id ? { ...discount, ...editedData } : discount
+        )
+      );
+  
       setEditingRow(null);
       alert("Discount updated successfully!");
     } catch (err) {
