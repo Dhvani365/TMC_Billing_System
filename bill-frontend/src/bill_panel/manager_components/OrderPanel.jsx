@@ -359,7 +359,7 @@ const OrderPanel = () => {
           console.error("Error fetching catalogs:", error);
           setCatalogs([]);
         } finally {
-          setTimeout(() => setLoadingCatalogs(false), 200);
+          setTimeout(() => setLoadingCatalogs(false));
         }
       } else {
         setCatalogs([]);
@@ -417,7 +417,6 @@ const OrderPanel = () => {
 
             };
           });
-          console.log(mergedProducts);
           setProducts(mergedProducts);
         } catch (error) {
           console.error("Error fetching products:", error);

@@ -56,28 +56,28 @@ export const signup = async(req,res) => {
 
 export const login = async (req, res) => {
   try {
-    const token = req.cookies.jwt;
-
+    let token = req.cookies.jwt;
     // 1. Auto-login with token if valid
     if (token) {
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId).select("-password");
+      // try {
+      //   const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      //   const user = await User.findById(decoded.userId).select("-password");
 
-        if (!user) {
-          return res.status(401).json({ message: "User not found" });
-        }
+      //   if (!user) {
+      //     return res.status(401).json({ message: "User not found" });
+      //   }
 
-        return res.status(200).json({
-          _id: user._id,
-          name: user.name,
-          role: user.role,
-          message: "Auto-login successful",
-        });
-      } catch (err) {
-        console.log("Auto-login token error:", err.message);
-        // Continue to manual login fallback
-      }
+      //   return res.status(200).json({
+      //     _id: user._id,
+      //     name: user.name,
+      //     role: user.role,
+      //     message: "Auto-login successful",
+      //   });
+      // } catch (err) {
+      //   console.log("Auto-login token error:", err.message);
+      //   // Continue to manual login fallback
+      // }
+      token = null;
     }
 
     // 2. Manual login with credentials
@@ -98,7 +98,6 @@ export const login = async (req, res) => {
     }
 
     generateToken(user._id, res);
-
     return res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -128,7 +127,7 @@ export const checkAuth = async (req, res) => {
   if (!user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  res.status(200).json({
+  return res.status(200).json({
     _id: user._id,
     name: user.name,
     role: user.role,

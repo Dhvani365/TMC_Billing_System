@@ -20,7 +20,7 @@ const Sidebar = () => {
       setActiveBrand(null); // Reset if no brands exist
     }
   }, [brands]);
-  
+
   useEffect(() => {
     const fetchBrands = async () => {
       if (selectedClient) {
@@ -29,16 +29,19 @@ const Sidebar = () => {
           const response = await axios.get(`${BACKEND_URL}/party/${selectedClient._id}`, {
             withCredentials: true,
           });
-          console.log("Fetched brands:", response.data);
+
+          // Extract brands and remove duplicates based on `_id`
           const extractedBrands = response.data.relations.map((relation) => relation.brand);
-          setBrands(extractedBrands);
-          // const extractedBrands = response.data.map((item) => item.brand); // Extract brand objects
-          // setBrands(extractedBrands);
+          const uniqueBrands = extractedBrands.filter(
+            (brand, index, self) => self.findIndex((b) => b._id === brand._id) === index
+          );
+
+          setBrands(uniqueBrands);
         } catch (error) {
           console.error("Error fetching brands:", error);
           setBrands([]);
         } finally {
-          setTimeout(() => setLoadingBrands(false), 200); // Simulate loading delay
+          setTimeout(() => setLoadingBrands(false)); // Simulate loading delay
         }
       } else {
         setBrands([]);
@@ -54,7 +57,7 @@ const Sidebar = () => {
 
       {selectedClient ? (
         loadingBrands ? (
-          <div style={{marginTop: "-100%"}} className="loading-container">
+          <div style={{ marginTop: "-100%" }} className="loading-container">
             <div className="loader"></div>
           </div>
         ) : (
