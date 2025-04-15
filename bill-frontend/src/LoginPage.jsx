@@ -106,7 +106,7 @@ const LoginPage = () => {
             </button>
           </div>
         </form>
-        <div className="text-center mt-4">
+        {/* <div className="text-center mt-4">
           New User?{' '}
           <button
             type="button"
@@ -114,8 +114,8 @@ const LoginPage = () => {
             onClick={() => navigate('/signup')}
           >
             Sign Up
-          </button>
-        </div>
+          </a>
+        </div> */}
       </div>
     </div>
   );

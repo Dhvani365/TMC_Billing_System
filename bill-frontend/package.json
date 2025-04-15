@@ -16,6 +16,8 @@
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "docx": "^9.3.0",
+    "file-saver": "^2.0.5",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.487.0",

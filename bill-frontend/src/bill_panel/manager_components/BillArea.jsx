@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeFromBill, resetBill, updateQuantity, updateDiscountedPrice } from '../store/billSlice';
 import { FaTimes } from 'react-icons/fa';
 import { Separator } from "@radix-ui/react-separator";
+import {  Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, convertInchesToTwip} from "docx";
+import { saveAs } from "file-saver";
 import './BillArea.css';
 
 const BillArea = () => {
@@ -266,8 +268,295 @@ const BillArea = () => {
     printWindow.document.write(billContent);
     printWindow.document.close();
   };
+
+  const paddedCell = (paragraphs, options = {}) => new TableCell({
+    children: paragraphs,
+    margins: {
+      top: convertInchesToTwip(0.05),
+      bottom: convertInchesToTwip(0.05),
+      left: convertInchesToTwip(0.1),
+      right: convertInchesToTwip(0.1),
+    },
+    ...options,
+  });
   
+  const handleDownloadDocx = () => {
+    const currentDate = new Date().toLocaleDateString();
+    const total = bill.reduce((acc, item) => acc + parseFloat(item.total), 0);
+    const cgst = +(total * 0.025).toFixed(2);
+    const sgst = +(total * 0.025).toFixed(2);
+    const totalTax = cgst + sgst;
+    const roundOff = +(Math.round(total + cgst + sgst) - (total + cgst + sgst)).toFixed(2);
+    const grandTotal = +(total + cgst + sgst + roundOff).toFixed(2);
   
+    const numberToWords = (num) => {
+      const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+        'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  
+      const inWords = (n) => {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '');
+        if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' and ' + inWords(n % 100) : '');
+        if (n < 100000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + inWords(n % 1000) : '');
+        return inWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 !== 0 ? ' ' + inWords(n % 100000) : '');
+      };
+  
+      const integerPart = Math.floor(num);
+      const fractional = Math.round((num - integerPart) * 100);
+      return inWords(integerPart) + (fractional > 0 ? ` and ${inWords(fractional)} Paise` : '') + " Only";
+    };
+  
+    const headers = ["#", "Description of Goods", "HSN/SAC", "GST Rate", "Quantity", "Rate", "Disc. Price", "Amount"];
+    const itemRows = bill.map((item, index) => [
+      String(index + 1),
+      item.productName,
+      "",
+      "5%",
+      `${item.quantity} Pcs`,
+      `₹${item.price}`,
+      item.discountedPrice ? `₹${item.discountedPrice}` : "-",
+      `₹${item.total}`,
+    ]);
+  
+    const blankLine = new Paragraph({ text: "", spacing: { after: 0 } });
+  
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+    
+          // --- Table 1: Header + Invoice Details ---
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "GIRNAR FASHION", bold: true })] }),
+                    new Paragraph("Avadh Textile Market, Surat, Gujarat"),
+                    new Paragraph("GSTIN/UIN: 24CMPPS0737K1ZK"),
+                    new Paragraph("State Name: Gujarat, Code: 24"),
+                  ], { columnSpan: 2, rowSpan: 2 }),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Invoice No:", bold: true })] }),
+                    new Paragraph("GST/5124")
+                  ]),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Date:", bold: true })] }),
+                    new Paragraph(currentDate)
+                  ]),
+                ],
+              }),
+              new TableRow({
+                children:  [
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Delivery Note:", bold: true })] }),
+                    new Paragraph("5124")
+                  ]),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Mode/Terms of Payment:", bold: true })] }),
+                    new Paragraph("Immediately / 30 Days/ _______")
+                  ]),
+                ]
+              }),
+            ],
+            width: { size: 100, type: WidthType.PERCENTAGE }
+          }),
+    
+          blankLine,
+    
+          // --- Table 2: Buyer Info + Dispatch Info ---
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Buyer (Bill to):", bold: true })] }),
+                    new Paragraph("UCA Lifestyle"),
+                    new Paragraph("Flat No.404, Manglam Apart., Begumpura, Surat"),
+                    new Paragraph("GSTIN/UIN: 24GORPS9172G2Z3"),
+                    new Paragraph("State Name: Gujarat, Code: 24"),
+                  ], { rowSpan: 2 }),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Dispatch Doc No.", bold: true })] })
+                  ]),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Delivery Note Date", bold: true })] }),
+                    new Paragraph("18-Jan-25")
+                  ]),
+                ]
+              }),
+              new TableRow({
+                children: [
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Dispatched through", bold: true })] })
+                  ]),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Destination", bold: true })] })
+                  ]),
+                ]
+              }),
+            ],
+            width: { size: 100, type: WidthType.PERCENTAGE }
+          }),
+    
+          blankLine,
+
+          // --- Table 3: Product + Total Tax Summary ---
+new Table({
+  rows: [
+    new TableRow({
+      children: headers.map(h =>
+        paddedCell([
+          new Paragraph({
+            children: [new TextRun({ text: h, bold: true })]
+          })
+        ])
+      )
+    }),
+    ...itemRows.map(row =>
+      new TableRow({
+        children: row.map(val =>
+          paddedCell([new Paragraph(val)])
+        )
+      })
+    ),
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({ children: [new TextRun({ text: "CGST", bold: true })], alignment: AlignmentType.RIGHT })
+        ], { columnSpan: 7 }),
+        paddedCell([new Paragraph(`₹${cgst.toFixed(2)}`)])
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({ children: [new TextRun({ text: "SGST", bold: true })], alignment: AlignmentType.RIGHT })
+        ], { columnSpan: 7 }),
+        paddedCell([new Paragraph(`₹${sgst.toFixed(2)}`)])
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({ children: [new TextRun({ text: "Round Off", bold: true })], alignment: AlignmentType.RIGHT })
+        ], { columnSpan: 7 }),
+        paddedCell([new Paragraph(`₹${roundOff}`)])
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({ children: [new TextRun({ text: "Total Amount", bold: true })] })
+        ], { columnSpan: 7 }),
+        paddedCell([new Paragraph(`₹${total.toFixed(2)}`)])
+      ]
+    }),
+  ],
+  width: { size: 100, type: WidthType.PERCENTAGE }
+}),
+blankLine,
+// --- Table 4: Amount Chargeable + Tax Table ---
+new Table({
+  rows: [
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({
+            children: [new TextRun({ text: `Amount Chargeable (in words): INR ${numberToWords(grandTotal)}`, bold: true })]
+          })
+        ], { columnSpan: 6 })
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([new Paragraph({ children: [new TextRun({ text: "Taxable Value", bold: true })] })], { rowSpan: 2 }),
+        paddedCell([new Paragraph({ children: [new TextRun({ text: "Central Tax", bold: true })] })], { columnSpan: 2 }),
+        paddedCell([new Paragraph({ children: [new TextRun({ text: "State Tax", bold: true })] })], { columnSpan: 2 }),
+        paddedCell([new Paragraph({ children: [new TextRun({ text: "Total Tax Amount", bold: true })] })], { rowSpan: 2 }),
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([new Paragraph("Value")]),
+        paddedCell([new Paragraph("Rate")]),
+        paddedCell([new Paragraph("Value")]),
+        paddedCell([new Paragraph("Rate")]),
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([new Paragraph(`₹${total.toFixed(2)}`)]),
+        paddedCell([new Paragraph(`₹${cgst.toFixed(2)}`)]),
+        paddedCell([new Paragraph("2.50%")]),
+        paddedCell([new Paragraph(`₹${sgst.toFixed(2)}`)]),
+        paddedCell([new Paragraph("2.50%")]),
+        paddedCell([new Paragraph(`₹${totalTax.toFixed(2)}`)])
+      ]
+    }),
+    new TableRow({
+      children: [
+        paddedCell([
+          new Paragraph({
+            children: [new TextRun({ text: `Tax Amount (in words): INR ${numberToWords(cgst + sgst)}`, bold: true })]
+          })
+        ], { columnSpan: 6 })
+      ]
+    }),
+  ],
+  width: { size: 100, type: WidthType.PERCENTAGE }
+}),
+blankLine,
+
+    
+          // --- Table 5: Declaration + Bank + Signature ---
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Declaration", bold: true })] }),
+                    new Paragraph("We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.")
+                  ]),
+                  paddedCell([
+                    new Paragraph({ children: [new TextRun({ text: "Company’s Bank Details", bold: true })] }),
+                    new Paragraph("Bank Name: Kotak Bank 0786"),
+                    new Paragraph("A/c No.: 6345120786"),
+                    new Paragraph("Branch & IFS Code: Ring Road, Surat & KKBK0002847")
+                  ])
+                ]
+              }),
+              new TableRow({
+                children: [
+                  paddedCell([
+                    new Paragraph({
+                      children: [new TextRun("For Girnar Fashion")],
+                      alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({
+                      children: [new TextRun("Authorised Signatory")],
+                      alignment: AlignmentType.CENTER,
+                    }),
+                  ], { columnSpan: 2 })
+                ]
+              })
+            ],
+            width: { size: 100, type: WidthType.PERCENTAGE }
+          })
+    
+        ]
+      }]
+    });
+    
+  
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, "Girnar_Fashion_Invoice.docx");
+    });
+  };
+    
   const handleSave = (bill) => {
     // Implement your save logic here
     alert("Bill saved successfully"); 
@@ -382,6 +671,14 @@ const BillArea = () => {
           >
             Print
           </button>
+
+          <button
+            onClick={handleDownloadDocx}
+            className="text-white bg-blue-500 hover:bg-blue-600 px-5 py-2 border border-zinc-800 rounded-sm"
+          >
+            Download Word
+          </button>
+
         </div>
       </div>
     </div>
