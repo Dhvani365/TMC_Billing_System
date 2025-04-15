@@ -30,7 +30,9 @@ function AddCatalogs() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/brand`);
+        const response = await axios.get(`${BACKEND_URL}/brand`, {
+          withCredentials: true,
+        });
         setBrands(response.data); // Extract brand names
   
         // If preselectedBrand is set, initialize formData.brandName
@@ -126,6 +128,8 @@ function AddCatalogs() {
         name: formData.catalogName,
         brand: formData.brandName,
         no_of_skus: formData.numberOfSKUs,
+      }, {
+        withCredentials: true,
       });
 
       console.log("Catalog ID:", catalogResponse);
@@ -148,6 +152,8 @@ function AddCatalogs() {
 
       await axios.post(`${BACKEND_URL}/sku/add`, skuFormData, {
         headers: { "Content-Type": "multipart/form-data" },
+      }, {
+        withCredentials: true,
       });
 
       alert("Catalog and SKUs added successfully!");

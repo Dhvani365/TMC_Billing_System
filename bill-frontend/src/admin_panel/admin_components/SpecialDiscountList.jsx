@@ -26,7 +26,9 @@ export default function SpecialDiscountList() {
   useEffect(() => {
     const fetchDiscounts = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/specialdiscount`);
+        const response = await axios.get(`${BACKEND_URL}/specialdiscount`, {
+          withCredentials: true,
+        });
         console.log(response.data);
         setDiscountsData(response.data);
         setFilteredDiscounts(response.data); // Initialize filtered data
@@ -71,7 +73,9 @@ export default function SpecialDiscountList() {
   // Handle deleting a discount
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BACKEND_URL}/specialdiscount/delete/${id}`);
+      await axios.delete(`${BACKEND_URL}/specialdiscount/delete/${id}`, {
+        withCredentials: true,
+      });
       setFilteredDiscounts((prevDiscounts) => prevDiscounts.filter((discount) => discount._id !== id));
       setSelectedRows((prevSelected) => prevSelected.filter((rowId) => rowId !== id));
       alert("Discount deleted successfully!");
@@ -98,7 +102,9 @@ export default function SpecialDiscountList() {
       };
   
       // Send the updated discount to the backend
-      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, updatedDiscount);
+      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, updatedDiscount, {
+        withCredentials: true,
+      });
   
       // Update the state with the toggled status
       setFilteredDiscounts((prevDiscounts) =>
@@ -130,7 +136,9 @@ export default function SpecialDiscountList() {
   // Handle saving edited discount data
   const handleSave = async (id) => {
     try {
-      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, editedData);
+      await axios.put(`${BACKEND_URL}/specialdiscount/update/${id}`, editedData, {
+        withCredentials: true,
+      });
   
       // Update both filteredDiscounts and discountsData with the edited data
       setFilteredDiscounts((prevDiscounts) =>
