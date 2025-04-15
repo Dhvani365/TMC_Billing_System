@@ -6,17 +6,56 @@ import { Separator } from "@radix-ui/react-separator";
 import {  Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, convertInchesToTwip} from "docx";
 import { saveAs } from "file-saver";
 import './BillArea.css';
+import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+
 
 const BillArea = () => {
   const dispatch = useDispatch();
   const bill = useSelector((state) => state.bill.items);
+  const selectedClient = useSelector((state) => state.client.selectedClient);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
-
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [customInvoiceNumber, setCustomInvoiceNumber] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
+  const [billId, setBillId] = useState(null);
+  const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
   const total = bill.reduce((acc, item) => acc + parseFloat(item.total), 0);
   const totalPages = Math.ceil(bill.length / itemsPerPage);
   const currentItems = bill.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  
+  const generateInvoiceNumber = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    
+    return `GST/${year}${month}${day}/${hours}${minutes}${seconds}-${randomSuffix}`;
+  };
 
+  const getOrGenerateInvoiceNumber = () => {
+    // If custom invoice number is provided, use it
+    if (customInvoiceNumber) {
+      return customInvoiceNumber;
+    }
+    
+    // If we already have a generated invoice number, use it
+    if (invoiceNumber) {
+      return invoiceNumber;
+    }
+    
+    // Otherwise, generate a new one and store it
+    const newInvoiceNumber = generateInvoiceNumber();
+    setInvoiceNumber(newInvoiceNumber);
+    return newInvoiceNumber;
+  };
+  
   // Handle quantity change and dispatch the update action
   const handleQuantityChange = (itemId, newQuantity) => {
     const numericQuantity = parseInt(newQuantity);
@@ -41,7 +80,7 @@ const BillArea = () => {
   const handleIncrease = (itemId, currentQuantity) => {
     dispatch(updateQuantity({ id: itemId, quantity: currentQuantity + 1 }));
   };
-
+  
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     
@@ -126,10 +165,10 @@ const BillArea = () => {
                 <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24
             </td>
           <td colspan="2" class="left">
-            <strong>Invoice No:</strong> GST/5124<br>
+            <strong>Invoice No:</strong> ${getOrGenerateInvoiceNumber()}<br>
           </td>
           <td colspan="2" class="left">
-            <strong>Date:</strong> ${new Date().toLocaleDateString()}
+            <strong>Date:</strong> ${customDate ? new Date(customDate).toLocaleDateString() : new Date().toLocaleDateString()}
           </td>
         </tr>
         <tr>
@@ -146,10 +185,9 @@ const BillArea = () => {
           <tr>
             <td colspan="4" rowspan="2" width="50%">
                 <strong>Consignee (Ship to)</strong><br>
-                UCA Lifestyle<br>
-                Flat No.404, Manglam Apartment,<br>
-                Shetranjiwad, Begumpura, Surat<br>
-                <strong>GSTIN/UIN:</strong> 24GORPS9172G2Z3<br>
+                ${selectedClient.name}<br>
+                ${selectedClient.address}<br>
+                <strong>GSTIN/UIN:</strong> ${selectedClient.gst_no}<br>
                 <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24
             </td>
             <td colspan="2" class="left"><strong>Dispatch Doc No.</strong></td>
@@ -162,10 +200,9 @@ const BillArea = () => {
         <tr>
             <td colspan="4" rowspan="2">
                 <strong>Buyer (Bill to)</strong><br>
-                UCA Lifestyle<br>
-                Flat No.404, Manglam Apartment,<br>
-                Shetranjiwad, Begumpura, Surat<br>
-                <strong>GSTIN/UIN:</strong> 24GORPS9172G2Z3<br>
+                ${selectedClient.name}<br>
+                ${selectedClient.address}<br>
+                <strong>GSTIN/UIN:</strong> ${selectedClient.gst_no}<br>
                 <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24<br>
                 <strong>Place to Supply:</strong> Gujarat
             </td>
@@ -339,11 +376,11 @@ const BillArea = () => {
                   ], { columnSpan: 2, rowSpan: 2 }),
                   paddedCell([
                     new Paragraph({ children: [new TextRun({ text: "Invoice No:", bold: true })] }),
-                    new Paragraph("GST/5124")
+                    new Paragraph(getOrGenerateInvoiceNumber())
                   ]),
                   paddedCell([
                     new Paragraph({ children: [new TextRun({ text: "Date:", bold: true })] }),
-                    new Paragraph(currentDate)
+                    new Paragraph(customDate ? new Date(customDate).toLocaleDateString() : currentDate)
                   ]),
                 ],
               }),
@@ -372,9 +409,9 @@ const BillArea = () => {
                 children: [
                   paddedCell([
                     new Paragraph({ children: [new TextRun({ text: "Buyer (Bill to):", bold: true })] }),
-                    new Paragraph("UCA Lifestyle"),
-                    new Paragraph("Flat No.404, Manglam Apart., Begumpura, Surat"),
-                    new Paragraph("GSTIN/UIN: 24GORPS9172G2Z3"),
+                    new Paragraph(selectedClient.name),
+                    new Paragraph(selectedClient.address),
+                    new Paragraph(`GSTIN/UIN: ${selectedClient.gst_no}`),
                     new Paragraph("State Name: Gujarat, Code: 24"),
                   ], { rowSpan: 2 }),
                   paddedCell([
@@ -557,14 +594,168 @@ blankLine,
     });
   };
     
-  const handleSave = (bill) => {
-    // Implement your save logic here
-    alert("Bill saved successfully"); 
-  }
+  const handleSave = async () => {
+    try {
+      
+      // Check if bill is empty
+      if (bill.length === 0) {
+        alert("Cannot save an empty bill");
+        return;
+      }
+      
+      // Check if client is selected
+      if (!selectedClient || !selectedClient._id) {
+        alert("Please select a party/client first");
+        return;
+      }
+  
+      // Calculate tax amounts and totals
+      const totalAmount = bill.reduce((acc, item) => acc + parseFloat(item.total), 0);
+      const cgst = +(totalAmount * 0.025).toFixed(2);
+      const sgst = +(totalAmount * 0.025).toFixed(2);
+      const roundOff = +(Math.round(totalAmount + cgst + sgst) - (totalAmount + cgst + sgst)).toFixed(2);
+      const grandTotal = Math.round(totalAmount + cgst + sgst);
+  
+      // Generate timestamp-based invoice number
+      const currentInvoiceNumber = getOrGenerateInvoiceNumber();
+      
 
+      const billDate = customDate ? new Date(customDate) : new Date();
+      // Format bill items to match the backend model
+      const billItems = bill.map((item,index) => ({
+        skuId: item.objectid, // Assuming item.id is the SKU ID
+        productName: item.productName,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        discountedPrice: item.discountedPrice ? parseFloat(item.discountedPrice) : undefined,
+        total: parseFloat(item.total)
+      }));
+  
+      // Create the bill object according to your backend model
+      const billData = {
+        invoiceNumber: currentInvoiceNumber,
+        date: billDate,
+        partyId: selectedClient._id,
+        party: {
+          name: selectedClient.name,
+          address: selectedClient.address,
+          gstin: selectedClient.gst_no,
+          state: "Gujarat", // You might want to get this from the client data
+          stateCode: "24"   // You might want to get this from the client data
+        },
+        items: billItems,
+        totalAmount,
+        cgst,
+        sgst,
+        roundOff,
+        grandTotal,
+        notes: "", // Optional notes
+        status: "active"
+      };
+  
+      // Get the token from localStorage (assuming you store it there after login)
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert("You must be logged in to save bills");
+        return;
+      }
+  
+      // Make the API call to save the bill
+      
+    let response;
+    
+    // Determine if we're saving a new bill or updating an existing one
+    if (isSaved && billId) {
+      // Update existing bill
+      response = await axios.put(
+        `${BACKEND_URL}/bill/update/${billId}`, billData);
+      
+      if (response.status === 200) {
+        alert("Bill updated successfully!");
+      }
+      } else {
+        // Save new bill
+        response = await axios.post(`${BACKEND_URL}/bill/add`,  billData);
+        
+        if (response.status === 201) {
+          alert("Bill saved successfully!");
+          // Store the bill ID and set isSaved to true
+          setBillId(response.data._id);
+          setIsSaved(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error saving/updating bill:", error);
+        
+      if (error.response) {
+        // The server responded with a status code outside the 2xx range
+        if (error.response.status === 400 && error.response.data.message) {
+          alert(`Error: ${error.response.data.message}`);
+        } else if (error.response.status === 401) {
+          alert("Authentication error. Please log in again.");
+        } else {
+          alert(`Error: ${error.response.status} - ${error.response.data.message || "Unknown error"}`);
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        // Something happened in setting up the request
+        alert(`Error: ${error.message}`);
+      }
+    }
+  };
+
+  const handleReset = () => {
+    dispatch(resetBill());
+    setInvoiceNumber('');
+    if (customInvoiceNumber) {
+      // Extract numeric part and increment it
+      const match = customInvoiceNumber.match(/(\D*)(\d+)(\D*)/);
+      if (match) {
+        const [_, prefix, number, suffix] = match;
+        const incrementedNumber = (parseInt(number, 10) + 1).toString().padStart(number.length, '0');
+        setCustomInvoiceNumber(`${prefix}${incrementedNumber}${suffix}`);
+      } else {
+        // If no numeric part, just clear it
+        setCustomInvoiceNumber('');
+      }
+    } else {
+      setCustomInvoiceNumber('');
+    }
+    setCustomDate(new Date().toISOString().split('T')[0]); // Reset date to today
+    setIsSaved(false); // Reset saved status
+    setBillId(null); // Clear bill ID
+  };
   return (
     <div className="w-[50%] p-5 m-3 bg-zinc-100 rounded-xl shadow-sm flex flex-col justify-between h-[85%] printableArea">
-      <h2 className="text-xl font-bold text-black mb-2">Bill Details</h2>
+      <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-bold text-black">Bill Details</h2>
+      <div className="flex space-x-4">
+        <div>
+          <label htmlFor="invoiceNumber" className="block text-sm font-medium text-gray-700">Invoice Number</label>
+          <input
+            type="text"
+            id="invoiceNumber"
+            value={customInvoiceNumber}
+            onChange={(e) => setCustomInvoiceNumber(e.target.value)}
+            placeholder="GST/XXXX"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+          />
+        </div>
+        <div>
+          <label htmlFor="invoiceDate" className="block text-sm font-medium text-gray-700">Date</label>
+          <input
+            type="date"
+            id="invoiceDate"
+            value={customDate}
+            onChange={(e) => setCustomDate(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+          />
+        </div>
+      </div>
+    </div>
 
       {/* Scrollable Table */}
       <div className="overflow-auto flex-grow shadow-2xl">
@@ -656,13 +847,13 @@ blankLine,
             onClick={() => handleSave(bill)}
             className="text-white bg-green-500 hover:bg-green-600 px-5 py-2 border border-zinc-800 rounded-sm"
           >
-            Save
+            {isSaved ? "Update" : "Save"}
           </button>
           <button
-            onClick={() => dispatch(resetBill())}
+            onClick={()=> handleReset()}
             className="text-white bg-red-500 hover:bg-green-600 px-5 py-2 border border-zinc-800 rounded-sm"
           >
-            Reset
+            New Bill
           </button>
         
           <button

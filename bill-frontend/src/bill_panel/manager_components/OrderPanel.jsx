@@ -437,6 +437,7 @@ const OrderPanel = () => {
     // Prepare bill data
     const billItem = {
       id: uniqueId,
+      objectid: selectedProduct._id,
       productName: selectedProduct.sku_number,
       price: selectedProduct.basePrice,
       priceType: selectedProduct.priceType,

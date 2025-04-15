@@ -10,6 +10,7 @@ import partyBrandRoutes from "./routes/partyBrand.route.js"
 import pricingRoutes from "./routes/pricing.route.js"
 import skuRoutes from "./routes/sku.route.js"
 import specialDiscountRoutes from "./routes/specialdiscount.route.js"
+import billRoutes from "./routes/bill.route.js"
 import {connectDb} from "./lib/db.js"
  
 dotenv.config({path : '../.env'});
@@ -36,6 +37,7 @@ app.use("/api/partyBrand",partyBrandRoutes);
 app.use("/api/pricing",pricingRoutes);
 app.use("/api/sku",skuRoutes);
 app.use("/api/specialdiscount",specialDiscountRoutes);
+app.use("/api/bill",billRoutes);
 
 app.listen(PORT, () => {
     connectDb()
