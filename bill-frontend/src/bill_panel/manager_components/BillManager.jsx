@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { format } from "date-fns";
+import { setBill, setMetadata }from '../store/billSlice'; 
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -120,17 +121,13 @@ const BillManager = ({ isOpen, onClose, clients }) => {
         total: item.total
       }));
       
-      dispatch({ type: 'bill/setBill', payload: billItems });
-      
-      // Set bill metadata (invoice number, date, etc.)
-      dispatch({ 
-        type: 'bill/setMetadata', 
-        payload: {
-          invoiceNumber: response.data.invoiceNumber,
-          date: response.data.date,
-          billId: response.data._id
-        }
-      });
+      console.log(response.data);
+      dispatch(setBill(billItems));
+      dispatch(setMetadata({
+        invoiceNumber: response.data.invoiceNumber,
+        date: response.data.date,
+        billId: response.data._id
+      }));
       
       // Close the modal
       onClose();
@@ -141,6 +138,51 @@ const BillManager = ({ isOpen, onClose, clients }) => {
     }
   };
 
+  const loadBillsOfParty = async (partyId) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/bill/party/${partyId}`, {
+        withCredentials: true,
+      });
+  
+      const partyBills = response.data;
+      if (!partyBills || partyBills.length === 0) {
+        alert("No bills found for this party.");
+        return;
+      }
+  
+      // Sort bills by date (descending) and pick the latest
+      const latestBill = [...partyBills].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  
+      const client = clients.find(c => c._id === partyId);
+      if (client) {
+        dispatch({ type: 'client/setSelectedClient', payload: client });
+      }
+  
+      const billItems = latestBill.items.map(item => ({
+        id: item.skuId,
+        objectid: item.skuId,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        discountedPrice: item.discountedPrice || "",
+        total: item.total
+      }));
+  
+      dispatch(setBill(billItems));
+      dispatch(setMetadata({
+        invoiceNumber: latestBill.invoiceNumber,
+          date: latestBill.date,
+          billId: latestBill._id
+      }));
+  
+      onClose(); // close the modal
+  
+    } catch (error) {
+      console.error("Error loading bills for party:", error);
+      alert("Failed to load bills. Please try again.");
+    }
+  };
+  
   if (!isOpen) return null;
 
   return (
@@ -239,7 +281,8 @@ const BillManager = ({ isOpen, onClose, clients }) => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBills.map((bill) => (
-                  <tr key={bill._id} className="hover:bg-gray-50">
+                  <tr key={bill._id} className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => loadBillsOfParty(bill.partyId)}>
                     <td className="px-6 py-4 whitespace-nowrap">{bill.invoiceNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {new Date(bill.date).toLocaleDateString()}

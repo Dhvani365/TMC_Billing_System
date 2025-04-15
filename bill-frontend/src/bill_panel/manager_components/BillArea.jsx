@@ -9,8 +9,6 @@ import './BillArea.css';
 import axios from 'axios';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-
-
 const BillArea = () => {
   const dispatch = useDispatch();
   const bill = useSelector((state) => state.bill.items);
@@ -25,7 +23,8 @@ const BillArea = () => {
   const total = bill.reduce((acc, item) => acc + parseFloat(item.total), 0);
   const totalPages = Math.ceil(bill.length / itemsPerPage);
   const currentItems = bill.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  
+  // const billDate = useSelector((state) => state.bill.date);
+
   const generateInvoiceNumber = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -654,7 +653,7 @@ blankLine,
       };
   
       // Get the token from localStorage (assuming you store it there after login)
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('userid');
       
       if (!token) {
         alert("You must be logged in to save bills");
@@ -674,7 +673,7 @@ blankLine,
       if (response.status === 200) {
         alert("Bill updated successfully!");
       }
-      } else {
+    } else {
         // Save new bill
         response = await axios.post(`${BACKEND_URL}/bill/add`,  billData);
         
