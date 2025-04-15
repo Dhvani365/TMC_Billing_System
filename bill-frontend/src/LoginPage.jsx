@@ -88,12 +88,12 @@ const LoginPage = () => {
             </button>
           </div>
         </form>
-        <div className="text-center mt-4">
+        {/* <div className="text-center mt-4">
           New User?{' '}
           <a href="/signup" className="text-green-900 hover:underline">
             Sign Up
           </a>
-        </div>
+        </div> */}
       </div>
     </div>
   );
