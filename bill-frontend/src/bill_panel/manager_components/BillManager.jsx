@@ -36,7 +36,9 @@ const BillManager = ({ isOpen, onClose, clients }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${BACKEND_URL}/bill`);
+      const response = await axios.get(`${BACKEND_URL}/bill`, {
+        withCredentials: true,
+      });
       setSavedBills(response.data);
       setFilteredBills(response.data);
     } catch (error) {
@@ -92,11 +94,11 @@ const BillManager = ({ isOpen, onClose, clients }) => {
   const loadBill = async (billId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${BACKEND_URL}/bill/${billId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axios.get(`${BACKEND_URL}/bill/${billId}`
+         , {
+        withCredentials: true,
+      }
+      );
       
       // Find the client from the bill
       const billPartyId = response.data.partyId;
@@ -260,7 +262,9 @@ const BillManager = ({ isOpen, onClose, clients }) => {
                         Edit
                       </button>
                       <button 
-                        onClick={() => window.open(`${BACKEND_URL}/bill/print/${bill._id}`, '_blank')}
+                        onClick={() => window.open(`${BACKEND_URL}/bill/print/${bill._id}`, '_blank', {
+                          withCredentials: true,
+                        })}
                         className="text-green-600 hover:text-green-900"
                       >
                         Print

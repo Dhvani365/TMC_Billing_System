@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MdDashboard } from "react-icons/md";
 import { BsApple, BsArchiveFill, BsBriefcaseFill, BsUiChecks } from "react-icons/bs";
 import { FaAddressCard, FaStar, FaTags } from "react-icons/fa";
+import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -25,6 +27,17 @@ const Sidebar = () => {
   const handleNavItemClick = (label, path) => {
     setActiveLink(label);
     navigate(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${BACKEND_URL}/auth/logout`, {}, { withCredentials: true });
+      alert("You are logged out successfully.");
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error.response?.data || error.message);
+      alert("Failed to log out. Please try again.");
+    }
   };
 
   return (
@@ -84,8 +97,18 @@ const Sidebar = () => {
           label="User Accounts"
           active={activeLink === "User Accounts"}
           onClick={() => handleNavItemClick("User Accounts", "/home/user-accounts")}
-        />
+        />        
       </nav>
+
+      {/* Logout Button */}
+      <div className="mt-6">
+        <button
+          onClick={handleLogout}
+          className="w-full px-4 py-2 text-white bg-green-600 rounded hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 };

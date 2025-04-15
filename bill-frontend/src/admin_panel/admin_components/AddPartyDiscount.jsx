@@ -64,7 +64,9 @@ function PartyDiscount({ onSaveSuccess }) {
   useEffect(() => {
     const fetchParties = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/party`);
+        const response = await axios.get(`${BACKEND_URL}/party`, {
+          withCredentials: true,
+        });
         setParties(response.data);
       } catch (err) {
         setError("Failed to fetch parties. Please try again.");
