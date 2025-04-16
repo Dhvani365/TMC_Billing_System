@@ -4,7 +4,10 @@ export const billSlice = createSlice({
   name: 'bill',
   initialState: {
     items: [],
-  },
+    invoiceNumber: '',
+    date: '',
+    billId: null
+  },  
   reducers: {
     addToBill: (state, action) => {
       state.items.push(action.payload);
@@ -15,6 +18,9 @@ export const billSlice = createSlice({
     resetBill: (state) => {
       state.items = [];
     },
+    setBill: (state, action) => {
+      state.items = action.payload;
+    },    
     updateQuantity: (state, action) => {
       const { id, quantity } = action.payload;
       const item = state.items.find(item => item.id === id);
@@ -31,8 +37,13 @@ export const billSlice = createSlice({
         item.total = item.quantity * discountedPrice; // Recalculate total
       }
     },
+    setMetadata: (state, action) => {
+      state.invoiceNumber = action.payload.invoiceNumber;
+      state.date = action.payload.date;
+      state.billId = action.payload.billId;
+    },    
   },
 });
 
-export const { addToBill, removeFromBill, resetBill, updateQuantity, updateDiscountedPrice } = billSlice.actions;
+export const { addToBill, removeFromBill, resetBill, setBill, updateQuantity, updateDiscountedPrice, setMetadata } = billSlice.actions;
 export default billSlice.reducer;

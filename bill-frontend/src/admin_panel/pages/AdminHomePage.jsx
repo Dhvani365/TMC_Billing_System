@@ -20,12 +20,16 @@ function HomePage() {
     const fetchPartiesAndBrands = async () => {
       try {
         // Fetch all parties
-        const partyResponse = await axios.get(`${BACKEND_URL}/party`);
+        const partyResponse = await axios.get(`${BACKEND_URL}/party`, {
+          withCredentials: true,
+        });
         const partiesData = partyResponse.data;
     
         // Fetch brands for each party using their IDs
         const brandRequests = partiesData.map((party) =>
-          axios.get(`${BACKEND_URL}/party/${party._id}`)
+          axios.get(`${BACKEND_URL}/party/${party._id}`, {
+            withCredentials: true,
+          })
         );
     
         const brandResponses = await Promise.all(brandRequests);
@@ -124,6 +128,8 @@ function HomePage() {
         address,
         preferred_courier,
         list_of_selected_brands,
+      }, {
+        withCredentials: true,
       });
   
       // Update the state with the response data
@@ -164,7 +170,9 @@ function HomePage() {
 
       // Make DELETE requests for each selected party
       for (const partyId of selectedRows) {
-        await axios.delete(`${BACKEND_URL}/party/delete/${partyId}`);
+        await axios.delete(`${BACKEND_URL}/party/delete/${partyId}`, {
+          withCredentials: true,
+        });
       }
 
       // Remove deleted parties from the state

@@ -22,7 +22,9 @@ function PartyDiscount({ onSaveSuccess }) {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/brand`);
+        const response = await axios.get(`${BACKEND_URL}/brand`, {
+          withCredentials: true,
+        });
         setBrands(response.data);
       } catch (err) {
         setError("Failed to fetch brands. Please try again.");
@@ -37,7 +39,9 @@ function PartyDiscount({ onSaveSuccess }) {
     const fetchCatalogs = async () => {
       if (formData.brand_id) {
         try {
-          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${formData.brand_id}`);
+          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${formData.brand_id}`, {
+            withCredentials: true,
+          });
           if(response.status !== 200) {
             alert("Catalog Does not exists for this Brand! First Add catalogs!");
             navigate("/home/add-catalog");
@@ -96,7 +100,9 @@ function PartyDiscount({ onSaveSuccess }) {
       };
 
       // Add new special discount
-      await axios.post(`${BACKEND_URL}/specialdiscount/add`, specialDiscountData);
+      await axios.post(`${BACKEND_URL}/specialdiscount/add`, specialDiscountData, {
+        withCredentials: true,
+      });
       
       alert("Party discount added successfully!");
       if (onSaveSuccess) {

@@ -27,7 +27,9 @@ export default function CatalogList() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/brand`);
+        const response = await axios.get(`${BACKEND_URL}/brand`, {
+          withCredentials: true,
+        });
         setBrands(response.data); // Populate brands dropdown
       } catch (error) {
         console.error("Error fetching brands:", error.response?.data || error.message);
@@ -43,7 +45,9 @@ export default function CatalogList() {
     if (selectedBrand) {
       const fetchCatalogs = async () => {
         try {
-          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${selectedBrand}`);
+          const response = await axios.get(`${BACKEND_URL}/catalog/brandid/${selectedBrand}`, {
+            withCredentials: true,
+          });
           if(response.status == 201){
             setCatalogs([]);
             return;
@@ -67,7 +71,9 @@ export default function CatalogList() {
     if (selectedCatalog) {
       const fetchSkus = async () => {
         try {
-          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`);
+          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`, {
+            withCredentials: true,
+          });
           setSkus(response.data); // Populate SKUs
         } catch (error) {
           console.error("Error fetching SKUs:", error.response?.data || error.message);
@@ -112,7 +118,9 @@ export default function CatalogList() {
   // Handle saving edited SKU data
   const handleSaveSku = async (id) => {
     try {
-      const response = await axios.put(`${BACKEND_URL}/sku/update/${id}`, editedSkuData);
+      const response = await axios.put(`${BACKEND_URL}/sku/update/${id}`, editedSkuData, {
+        withCredentials: true,
+      });
       alert("SKU updated successfully!");
       setSkus((prevSkus) =>
         prevSkus.map((sku) => (sku._id === id ? { ...sku, ...editedSkuData } : sku))
@@ -128,7 +136,9 @@ export default function CatalogList() {
   // Handle deleting a SKU
   const handleDeleteSku = async (id) => {
     try {
-      await axios.delete(`${BACKEND_URL}/sku/delete/${id}`);
+      await axios.delete(`${BACKEND_URL}/sku/delete/${id}`, {
+        withCredentials: true,
+      });
       alert("SKU deleted successfully!");
       setSkus((prevSkus) => prevSkus.filter((sku) => sku._id !== id));
     } catch (error) {
@@ -140,7 +150,9 @@ export default function CatalogList() {
   // Handle deleting a catalog
   const handleDeleteCatalog = async (id) => {
     try {
-      await axios.delete(`${BACKEND_URL}/catalog/delete/${id}`);
+      await axios.delete(`${BACKEND_URL}/catalog/delete/${id}`, {
+        withCredentials: true,
+      });
       alert("Catalog deleted successfully!");
       setCatalogs((prevCatalogs) => prevCatalogs.filter((catalog) => catalog._id !== id));
       setSelectedCatalog(""); // Reset selected catalog

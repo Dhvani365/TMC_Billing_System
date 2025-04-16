@@ -32,7 +32,9 @@ export default function BrandsList() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/brand`);
+        const response = await axios.get(`${BACKEND_URL}/brand`, {
+          withCredentials: true,
+        });
         console.log(response.data);
         setBrandsData(response.data); // Store the fetched brands in state
         setLoading(false);
@@ -112,7 +114,9 @@ export default function BrandsList() {
       console.log("Payload being sent:", payload);
   
       // Make PUT request to the backend
-      const response = await axios.put(`${BACKEND_URL}/brand/update/${id}`, payload);
+      const response = await axios.put(`${BACKEND_URL}/brand/update/${id}`, payload, {
+        withCredentials: true,
+      });
   
       alert("Brand updated successfully!");
   
@@ -136,7 +140,9 @@ export default function BrandsList() {
   const handleDelete = async (id) => {
     try {
       // Make DELETE request to the backend
-      const response = await axios.delete(`${BACKEND_URL}/brand/delete/${id}`);
+      const response = await axios.delete(`${BACKEND_URL}/brand/delete/${id}`, {
+        withCredentials: true,
+      });
       alert("Brand deleted successfully!");
       console.log("Response from backend:", response.data);
   

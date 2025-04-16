@@ -53,7 +53,9 @@ function AddBrands({onSave}) {
       };
   
       // Make POST request to the backend
-      const response = await axios.post(`${BACKEND_URL}/brand/add`, payload);
+      const response = await axios.post(`${BACKEND_URL}/brand/add`, payload,{
+        withCredentials: true,
+      });
   
       alert("Brand added successfully!");
   
