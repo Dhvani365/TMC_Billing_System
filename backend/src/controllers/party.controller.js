@@ -166,6 +166,67 @@ export const updateParty = async (req, res) => {
     }
 };
 
+export const assignBrandToParty = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { partyId, brandId, pricing_type, discount } = req.body;
+
+        // Validate party exists
+        const party = await Party.findById(partyId).session(session);
+        if (!party) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Party not found" });
+        }
+
+        // Validate brand exists
+        const brand = await Brand.findById(brandId).session(session);
+        if (!brand) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Brand not found" });
+        }
+
+        // Check if the brand is already assigned to the party
+        const existingRelation = await PartyBrandRelationData.findOne({
+            party: partyId,
+            brand: brandId,
+        }).session(session);
+
+        if (existingRelation) {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "Brand is already assigned to this party" });
+        }
+
+        // Validate pricing type
+        if (!brand.available_prices.includes(pricing_type)) {
+            await session.abortTransaction();
+            return res.status(400).json({
+                message: `Pricing type ${pricing_type} is not allowed for brand ${brand.name}`,
+            });
+        }
+
+        // Create the new brand relation
+        const newRelation = await PartyBrandRelationData.create(
+            [{
+                party: partyId,
+                brand: brandId,
+                default_price: pricing_type,
+                discount: discount || 0, // Default discount to 0 if not provided
+            }],
+            { session }
+        );
+
+        await session.commitTransaction();
+        res.status(201).json({ message: "Brand assigned to party successfully", relation: newRelation[0] });
+    } catch (error) {
+        await session.abortTransaction();
+        res.status(500).json({ message: "Error assigning brand to party", error: error.message });
+    } finally {
+        session.endSession();
+    }
+};
+
 // Delete party
 export const deleteParty = async (req, res) => {
     const session = await mongoose.startSession();

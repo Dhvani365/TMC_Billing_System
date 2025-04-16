@@ -8,6 +8,7 @@ function AddPricingForm() {
   const location = useLocation();
   const clientData = location.state?.clientData;
 
+  console.log("Client Data:", clientData);
   const [brands, setBrands] = useState([]); // Fetch brands from the backend
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,8 +64,8 @@ function AddPricingForm() {
       const payload = {
         name: clientData.name,
         address: clientData.address,
-        gst_no: clientData.gst,
-        preferred_courier: clientData.courier,
+        gst_no: clientData.gst || clientData.gst_no,
+        preferred_courier: clientData.courier || clientData.preferred_courier,
         list_of_selected_brands: selectedBrands.map((brand) => ({
           brand_id: brand.id,
           pricing_type: brand.pricingType, // Send the selected pricing type

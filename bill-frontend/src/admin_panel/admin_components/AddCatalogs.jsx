@@ -96,8 +96,8 @@ function AddCatalogs() {
     const skus = Array.from({ length: numberOfSKUs }, (_, index) => ({
       skuCode: `SKU-${index + 1}`, // Auto-increment SKU numbers starting from 1
       image: null,
-      cpPrice: "",
-      wsrPrice: "",
+      cpPrice: "0",
+      wsrPrice: "0",
     }));
     setFormData({ ...formData, numberOfSKUs, skus });
   };
@@ -160,6 +160,7 @@ function AddCatalogs() {
       navigate("/home/view-catalogs");
     } catch (error) {
       const errorMessage = error.response?.data?.message || error?.message || "An unexpected error occurred";
+      console.log(errorMessage);
       alert(`Failed to add catalog or SKUs; The SKU with same SKU number already exists!`);
     }
   };
@@ -246,7 +247,7 @@ function AddCatalogs() {
                   <input
                     type="number"
                     name="wsrPrice"
-                    value={formData.samePrice.wsrPrice}
+                    value={formData.samePrice.wsrPrice || "0"}
                     onChange={handleSamePriceChange}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
@@ -254,7 +255,7 @@ function AddCatalogs() {
                   <input
                     type="number"
                     name="cpPrice"
-                    value={formData.samePrice.cpPrice}
+                    value={formData.samePrice.cpPrice || "0"}
                     onChange={handleSamePriceChange}
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
@@ -300,7 +301,7 @@ function AddCatalogs() {
                 <label className="block text-gray-600 mb-1">WSR Price</label>
                 <input
                   type="number"
-                  value={sku.wsrPrice}
+                  value={sku.wsrPrice || "0"}
                   onChange={(e) => handleSKUsChange(index, "wsrPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}
@@ -311,7 +312,7 @@ function AddCatalogs() {
                 <label className="block text-gray-600 mb-1">CP Price</label>
                 <input
                   type="number"
-                  value={sku.cpPrice}
+                  value={sku.cpPrice || "0"}
                   onChange={(e) => handleSKUsChange(index, "cpPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}
