@@ -63,7 +63,10 @@ export const getSKUsByCatalog = async (req, res) => {
       const { catalogId } = req.params;
   
       // Fetch SKUs for the given brand and catalog
-      const skus = await SKU.find({ catalog: catalogId });
+      // const skus = await SKU.find({ catalog: catalogId });
+      const limit = parseInt(req.query.limit) || 100; // default to 100 SKUs
+      const skip = parseInt(req.query.skip) || 0;
+      const skus = await SKU.find({ catalog: catalogId }).skip(skip).limit(limit).lean();
         
       res.status(200).json(skus);
     } catch (error) {

@@ -71,7 +71,7 @@ export default function CatalogList() {
     if (selectedCatalog) {
       const fetchSkus = async () => {
         try {
-          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`, {
+          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}?limit=100&skip=0`, {
             withCredentials: true,
           });
           console.log(response.data)
