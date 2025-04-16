@@ -200,6 +200,23 @@ function HomePage() {
     });
   };
 
+  const handleAssignBrand = () => {
+    if (selectedRows.length === 1) {
+      const partyId = selectedRows[0];
+      const partyToAssign = combinedData.find((party) => party._id === partyId);
+  
+      if (!partyToAssign) {
+        alert("Party data is missing. Please try again.");
+        return;
+      }
+  
+      // Navigate to AddPricingForm with the selected party's data
+      navigate("/home/add-pricing", { state: { clientData: partyToAssign } });
+    } else {
+      alert("Please select exactly one party to assign a brand.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen p-6">
       <div className="flex justify-between items-center mb-4">
@@ -231,12 +248,20 @@ function HomePage() {
             Export Parties Data
           </Button>
           {selectedRows.length === 1 && (
-            <Button
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onClick={handleUpdateParty}
+            <>
+              <Button
+                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                onClick={handleUpdateParty}
+              >
+                Edit Party data
+              </Button>
+              <Button
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={handleAssignBrand}
             >
-              Edit Party data
+              Assign Brand
             </Button>
+            </>
           )}
           <Button
             className="bg-red-500 hover:bg-red-600 text-white"
