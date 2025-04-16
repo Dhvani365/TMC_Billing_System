@@ -301,7 +301,7 @@ function AddCatalogs() {
                 <label className="block text-gray-600 mb-1">WSR Price</label>
                 <input
                   type="number"
-                  value={sku.wsrPrice}
+                  value={sku.wsrPrice || 0}
                   onChange={(e) => handleSKUsChange(index, "wsrPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}
@@ -312,7 +312,7 @@ function AddCatalogs() {
                 <label className="block text-gray-600 mb-1">CP Price</label>
                 <input
                   type="number"
-                  value={sku.cpPrice}
+                  value={sku.cpPrice || 0}
                   onChange={(e) => handleSKUsChange(index, "cpPrice", e.target.value)}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={formData.allSKUSamePrice}

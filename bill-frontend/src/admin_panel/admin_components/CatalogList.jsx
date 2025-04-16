@@ -74,6 +74,7 @@ export default function CatalogList() {
           const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`, {
             withCredentials: true,
           });
+          console.log(response.data)
           setSkus(response.data); // Populate SKUs
         } catch (error) {
           console.error("Error fetching SKUs:", error.response?.data || error.message);

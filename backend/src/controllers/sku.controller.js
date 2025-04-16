@@ -145,7 +145,7 @@ export const addSKU = async (req, res) => {
   
       // Validate and save each SKU
       for (const sku of skus) {
-        if (!sku.sku_number || !sku.wsr_price || !sku.cp_price) {
+        if (!sku.sku_number) {
           await session.abortTransaction();
           return res.status(400).json({ message: "Missing required fields for SKU" });
         }
