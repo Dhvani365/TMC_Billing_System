@@ -154,6 +154,7 @@ function AddCatalogs() {
       navigate("/home/view-catalogs");
     } catch (error) {
       const errorMessage = error.response?.data?.message || error?.message || "An unexpected error occurred";
+      console.log(errorMessage);
       alert(`Failed to add catalog or SKUs; The SKU with same SKU number already exists!`);
     }
   };
