@@ -8,6 +8,7 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   // useEffect(() => {
@@ -87,7 +88,7 @@ const LoginPage = () => {
           <div>
             <label className="block text-gray-700">Password:</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleChange}
@@ -95,6 +96,17 @@ const LoginPage = () => {
               placeholder="Enter your password"
               required
             />
+            <div className="mt-2">
+              <label className="inline-flex items-center text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                  className="mr-2"
+                />
+                Show Password
+              </label>
+            </div>
           </div>
           <div className="text-center">
             <button
@@ -108,7 +120,7 @@ const LoginPage = () => {
         </form>
         {/* <div className="text-center mt-4">
           New User?{' '}
-          <button
+          <a
             type="button"
             className="text-green-900 hover:underline"
             onClick={() => navigate('/signup')}
