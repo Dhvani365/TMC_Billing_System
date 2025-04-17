@@ -44,7 +44,7 @@ app.use(express.static(path.join(__dirname, '../../bill-frontend/dist')));
 
 // Fallback route for React Router
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  res.sendFile(path.join(__dirname, '../../bill-frontend/dis/index.html'));
 });
 
 app.use("/api/auth", authRoutes);
