@@ -22,7 +22,7 @@ const allowedOrigins = [
     "http://localhost:5173" // for development
   ];
 
-dotenv.config({ path: '../.env' });
+dotenv.config();
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const app = express();
