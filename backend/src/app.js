@@ -14,6 +14,8 @@ import cookieParser from 'cookie-parser';
 import billRoutes from "./routes/bill.route.js"
 import {protectRoute} from './middlewares/auth.middleware.js';
 import { connectDb } from "./lib/db.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const allowedOrigins = [
     "https://tmc-bill-website.onrender.com",
@@ -32,6 +34,18 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser())
+
+// Needed for __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../../bill-frontend/dist')));
+
+// Fallback route for React Router
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
 
 app.use("/api/auth", authRoutes);
 app.use(protectRoute)
