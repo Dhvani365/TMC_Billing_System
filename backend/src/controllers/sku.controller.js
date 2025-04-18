@@ -61,18 +61,20 @@ export const updateSKUImage = async (req, res) => {
 export const getSKUsByCatalog = async (req, res) => {
     try {
       const { catalogId } = req.params;
+      const limit = 20; // Default: 20 SKUs per page
+      const page = 1;
+      const skip = (page - 1) * limit;
   
-      // Fetch SKUs for the given brand and catalog
-      // const skus = await SKU.find({ catalog: catalogId });
-      const limit = parseInt(req.query.limit) || 100; // default to 100 SKUs
-      const skip = parseInt(req.query.skip) || 0;
-      const skus = await SKU.find({ catalog: catalogId }).skip(skip).limit(limit).lean();
-        
+      const totalCount = await SKU.countDocuments({ catalog: catalogId });
+  
+      const skus = await SKU.find({ catalog: catalogId })
+     
       res.status(200).json(skus);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving SKUs", error });
     }
   };
+  
   
 // Get SKU by ID
 export const getSKUById = async (req, res) => {
@@ -107,74 +109,65 @@ export const getSKUById = async (req, res) => {
 };
 
 export const addSKU = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-  
-    try {
-  
-      // Proceed with processing the request body
-      const { brand, catalog } = req.body;
-  
-      // Parse SKUs from the request body
-        const { skus } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-        if (!Array.isArray(skus)) {
-            await session.abortTransaction();
-            return res.status(400).json({ message: "Invalid SKUs format" });
-        }
+  try {
+    const { brand, catalog, skus } = req.body;
 
-        // Attach images to the corresponding SKUs if files exist
-        skus.forEach((sku, index) => {
-            const file = req.files.find((file) => file.fieldname === `skus[${index}][image]`);
-            if (file) {
-                sku.image = {
-                data: file.buffer,
-                contentType: file.mimetype,
-                };
-            }
-        });
-  
-      // Attach images to the corresponding SKUs if files exist
-      req.files.forEach((file) => {
-        const match = file.fieldname.match(/^skus\[(\d+)\]\[image\]$/);
-        if (match) {
-          const index = parseInt(match[1], 10);
-          skus[index].image = {
-            data: file.buffer,
-            contentType: file.mimetype,
-          };
-        }
-      });
-  
-      // Validate and save each SKU
-      for (const sku of skus) {
-        if (!sku.sku_number) {
-          await session.abortTransaction();
-          return res.status(400).json({ message: "Missing required fields for SKU" });
-        }
-  
-        const newSKU = new SKU({
-          brand,
-          catalog,
-          sku_number: sku.sku_number,
-          wsr_price: sku.wsr_price,
-          cp_price: sku.cp_price,
-          image: sku.image || { data: null, contentType: null },
-        });
-  
-        await newSKU.save({ session });
-      }
-  
-      await session.commitTransaction();
-      res.status(201).json({ message: "SKUs added successfully" });
-    } catch (error) {
-        console.error("Error saving SKU:", error.message);
-        await session.abortTransaction();
-        return res.status(400).json({ message: "Error saving SKU", error: error.message });
-    } finally {
-      session.endSession();
+    if (!Array.isArray(skus)) {
+      await session.abortTransaction();
+      return res.status(400).json({ message: "Invalid SKUs format" });
     }
-  };
+
+    // Compress and attach images to the corresponding SKUs
+    for (let index = 0; index < skus.length; index++) {
+      const file = req.files.find(
+        (file) => file.fieldname === `skus[${index}][image]`
+      );
+
+      if (file) {
+        const compressedImageBuffer = await sharp(file.buffer)
+          .resize({ width: 300 })              // Resize (adjust width as needed)
+          .jpeg({ quality: 60 })               // Adjust quality (try 50–70)
+          .toBuffer();
+
+        skus[index].image = {
+          data: compressedImageBuffer,
+          contentType: "image/jpeg",
+        };
+      }
+    }
+
+    // Save each SKU
+    for (const sku of skus) {
+      if (!sku.sku_number) {
+        await session.abortTransaction();
+        return res.status(400).json({ message: "Missing required fields for SKU" });
+      }
+
+      const newSKU = new SKU({
+        brand,
+        catalog,
+        sku_number: sku.sku_number,
+        wsr_price: mongoose.Types.Decimal128.fromString(sku.wsr_price) || mongoose.Types.Decimal128.fromString("0"),
+        cp_price: mongoose.Types.Decimal128.fromString(sku.cp_price) || mongoose.Types.Decimal128.fromString("0"),
+        image: sku.image || { data: null, contentType: null },
+      });
+
+      await newSKU.save({ session });
+    }
+
+    await session.commitTransaction();
+    res.status(201).json({ message: "SKUs added successfully" });
+  } catch (error) {
+    console.error("Error saving SKU:", error.message);
+    await session.abortTransaction();
+    return res.status(400).json({ message: "Error saving SKU", error: error.message });
+  } finally {
+    session.endSession();
+  }
+};
 
 // Update SKU
 export const updateSKU = async (req, res) => {

@@ -19,8 +19,8 @@ function AddCatalogs() {
     gstRate: "",
     skus: [],
     samePrice: {
-      wsrPrice: "",
-      cpPrice: "",
+      wsrPrice: "0",
+      cpPrice: "0",
     },
   });
 
@@ -109,8 +109,8 @@ function AddCatalogs() {
     if (formData.allSKUSamePrice) {
       const updatedSKUs = formData.skus.map((sku) => ({
         ...sku,
-        wsrPrice: updatedSamePrice.wsrPrice,
-        cpPrice: updatedSamePrice.cpPrice,
+        wsrPrice: updatedSamePrice.wsrPrice || "0",
+        cpPrice: updatedSamePrice.cpPrice || "0",
       }));
       setFormData({ ...formData, samePrice: updatedSamePrice, skus: updatedSKUs });
     } else {
@@ -139,7 +139,7 @@ function AddCatalogs() {
       skuFormData.append("brand", formData.brandName);
       skuFormData.append("catalog", catalogId);
       formData.skus.forEach((sku, index) => {
-        if (!sku.skuCode || !sku.cpPrice || !sku.wsrPrice ) {
+        if (!sku.skuCode) {
           throw new Error(`Missing required fields for SKU at index ${index}`);
         }
         skuFormData.append(`skus[${index}][sku_number]`, sku.skuCode);
@@ -150,6 +150,7 @@ function AddCatalogs() {
         }
       });
 
+      console.log(skuFormData)
       await axios.post(`${BACKEND_URL}/sku/add`, skuFormData, {
         headers: { "Content-Type": "multipart/form-data" },
       }, {
