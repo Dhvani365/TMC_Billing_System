@@ -19,6 +19,7 @@ import { fileURLToPath } from 'url';
 
 const allowedOrigins = [
     "https://tmc-bill-website.onrender.com",
+    "http://15.206.148.113",
     "http://localhost:5173" // for development
   ];
 
@@ -41,11 +42,7 @@ const __dirname = path.dirname(__filename);
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../../bill-frontend/dist')));
-
-// Fallback route for React Router
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../bill-frontend/dis/index.html'));
-});
+console.log("Frontend path:", path.join(__dirname, '../../bill-frontend/dist'));
 
 app.use("/api/auth", authRoutes);
 app.use(protectRoute)
@@ -62,6 +59,10 @@ app.use("/api/sku", skuRoutes);
 app.use("/api/specialdiscount", specialDiscountRoutes);
 app.use("/api/bill",billRoutes);
 
+// Fallback route for React Router
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../bill-frontend/dist/index.html'));
+});
 
 app.listen(PORT, () => {
     connectDb();
