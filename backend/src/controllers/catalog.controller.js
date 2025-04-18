@@ -68,12 +68,9 @@ export const addCatalog = async (req, res) => {
 // Update catalog
 export const updateCatalog = async (req, res) => {
     try {
-        const { brand, name } = req.body;
-
+        const { brand, name, no_of_skus } = req.body;
         // Check if new name already exists for another catalog of the same brand
         const existingCatalog = await Catalog.findOne({
-            brand,
-            name,
             _id: { $ne: req.params.id }
         });
 
@@ -83,7 +80,7 @@ export const updateCatalog = async (req, res) => {
 
         const updatedCatalog = await Catalog.findByIdAndUpdate(
             req.params.id,
-            { name },
+            { name, no_of_skus },
             { new: true, runValidators: true }
         ).populate('brand', 'name');
 
