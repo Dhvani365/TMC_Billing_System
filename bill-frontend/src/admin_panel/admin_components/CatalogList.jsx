@@ -18,6 +18,12 @@ export default function CatalogList() {
   const [selectedSkus, setSelectedSkus] = useState([]); // Track selected SKUs
   const [editingSku, setEditingSku] = useState(null); // Track the SKU being edited
   const [editedSkuData, setEditedSkuData] = useState({}); // Store edited SKU data
+  const [editCatalogId, setEditCatalogId] = useState(null);
+  const [editCatalogData, setEditCatalogData] = useState({
+    name: "",
+    no_of_skus: 0,
+  });
+
   const searchInputRef = useRef(null); // Ref for the search bar
 
   // Focus on the search bar when it is rendered
@@ -155,6 +161,28 @@ export default function CatalogList() {
     }
   };
 
+  const handleUpdateCatalog = async (id) => {
+    console.log(selectedBrand);
+    try {
+      const response = await axios.put(
+        `${BACKEND_URL}/catalog/update/${id}`,
+        {
+          brand: selectedBrand,
+          name: editCatalogData.name,
+          no_of_skus: editCatalogData.no_of_skus,
+        }
+      );
+      // Refresh data
+      const updatedCatalogs = catalogs.map((catalog) =>
+        catalog._id === id ? response.data : catalog
+      );
+      setCatalogs(updatedCatalogs);
+      setEditCatalogId(null);
+    } catch (error) {
+      console.error("Error updating catalog:", error.message);
+    }
+  }
+
   // Handle deleting a catalog
   const handleDeleteCatalog = async (id) => {
     try {
@@ -246,21 +274,81 @@ export default function CatalogList() {
             <tbody>
               {catalogs.map((catalog) => (
                 <tr key={catalog._id}>
-                  <td className="border border-gray-300 p-2">{catalog.name}</td>
-                  <td className="border border-gray-300 p-2">{catalog.no_of_skus}</td>
                   <td className="border border-gray-300 p-2">
-                    <button
-                      onClick={() => setSelectedCatalog(catalog._id)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mr-2"
-                    >
-                      View SKUs
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCatalog(catalog._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
+                    {editCatalogId === catalog._id ? (
+                      <input
+                        type="text"
+                        value={editCatalogData.name}
+                        onChange={(e) =>
+                          setEditCatalogData({ ...editCatalogData, name: e.target.value })
+                        }
+                        className="border p-1 w-full"
+                      />
+                    ) : (
+                      catalog.name
+                    )}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {editCatalogId === catalog._id ? (
+                      <input
+                        type="number"
+                        value={editCatalogData.no_of_skus}
+                        onChange={(e) =>
+                          setEditCatalogData({
+                            ...editCatalogData,
+                            no_of_skus: e.target.value,
+                          })
+                        }
+                        className="border p-1 w-full"
+                      />
+                    ) : (
+                      catalog.no_of_skus
+                    )}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {editCatalogId === catalog._id ? (
+                      <>
+                        <button
+                          onClick={() => handleUpdateCatalog(catalog._id)}
+                          className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mr-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditCatalogId(null)}
+                          className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditCatalogId(catalog._id);
+                            setEditCatalogData({
+                              name: catalog.name,
+                              no_of_skus: catalog.no_of_skus,
+                            });
+                          }}
+                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mr-2"
+                        >
+                          Edit Catalog
+                        </button>
+                        <button
+                          onClick={() => setSelectedCatalog(catalog._id)}
+                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mr-2"
+                        >
+                          View SKUs
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCatalog(catalog._id)}
+                          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
