@@ -61,7 +61,7 @@ function AddPricingForm() {
 
   const handleSave = async () => {
     try {
-      const payload = {
+      let payload = {
         name: clientData.name,
         address: clientData.address,
         gst_no: clientData.gst || clientData.gst_no,
@@ -76,15 +76,29 @@ function AddPricingForm() {
       console.log("Payload being sent:", payload);
 
       // Make POST request to the backend
-      await axios.post(`${BACKEND_URL}/party/add`, payload, {
+      const res = await axios.post(`${BACKEND_URL}/party/add`, payload, {
         withCredentials: true,
       });
 
+      console.log(res);
+      if(res.status === 201){
+        payload = {
+          partyId: clientData._id,
+          list_of_selected_brands: selectedBrands.map((brand) => ({
+            brand_id: brand.id,
+            pricing_type: brand.pricingType, // Send the selected pricing type
+            discount: brand.discount ? brand.discountValue : 0,
+          })),
+        };
+        await axios.post(`${BACKEND_URL}/party/assignBrandToParty`, payload, {
+          withCredentials: true,
+        });
+      }
       alert("Party and pricing details saved successfully!");
       navigate("/home/client-profile");
     } catch (error) {
-      console.error("Error saving party and pricing details:", error.response?.data || error.message);
-      alert("Failed to save party and pricing details. Please try again.");
+      console.error("Error saving party and pricing details:", error.response?.message?.data || error?.message);
+      alert("Failed to save party and pricing details: "+error.response?.message?.data || error?.message);
     }
   };
 

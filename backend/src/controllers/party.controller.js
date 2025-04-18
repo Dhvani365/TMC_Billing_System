@@ -62,7 +62,7 @@ export const addParty = async (req, res) => {
         const existingParty = await Party.findOne({ gst_no }).session(session);
         if (existingParty) {
             await session.abortTransaction();
-            return res.status(400).json({ message: "Party with this GST number already exists" });
+            return res.status(201).json({ message: "Party with this GST number already exists", data: {partyId: existingParty._id} });
         }
 
         // Create party
@@ -103,7 +103,7 @@ export const addParty = async (req, res) => {
         await PartyBrandRelationData.insertMany(relationsToCreate, { session });
 
         await session.commitTransaction();
-        res.status(201).json(newParty[0]);
+        res.status(200).json(newParty[0]);
     } catch (error) {
         await session.abortTransaction();
         res.status(500).json({ message: "Error creating party", error: error.message });
@@ -171,8 +171,8 @@ export const assignBrandToParty = async (req, res) => {
     session.startTransaction();
 
     try {
-        const { partyId, brandId, pricing_type, discount } = req.body;
-
+        const { partyId, list_of_selected_brands } = req.body;
+        console.log("Here!!", req.body)
         // Validate party exists
         const party = await Party.findById(partyId).session(session);
         if (!party) {
@@ -180,48 +180,53 @@ export const assignBrandToParty = async (req, res) => {
             return res.status(404).json({ message: "Party not found" });
         }
 
-        // Validate brand exists
-        const brand = await Brand.findById(brandId).session(session);
-        if (!brand) {
-            await session.abortTransaction();
-            return res.status(404).json({ message: "Brand not found" });
-        }
+        const relationsToCreate = [];
 
-        // Check if the brand is already assigned to the party
-        const existingRelation = await PartyBrandRelationData.findOne({
-            party: partyId,
-            brand: brandId,
-        }).session(session);
+        for (const brandData of list_of_selected_brands) {
+            const { brand_id, pricing_type, discount } = brandData;
 
-        if (existingRelation) {
-            await session.abortTransaction();
-            return res.status(400).json({ message: "Brand is already assigned to this party" });
-        }
+            // Validate brand exists
+            const brand = await Brand.findById(brand_id).session(session);
+            if (!brand) {
+                await session.abortTransaction();
+                return res.status(404).json({ message: `Brand ${brand_id} not found` });
+            }
 
-        // Validate pricing type
-        if (!brand.available_prices.includes(pricing_type)) {
-            await session.abortTransaction();
-            return res.status(400).json({
-                message: `Pricing type ${pricing_type} is not allowed for brand ${brand.name}`,
+            // Check if already assigned
+            const existingRelation = await PartyBrandRelationData.findOne({
+                party: partyId,
+                brand: brand_id,
+            }).session(session);
+
+            if (existingRelation) {
+                await session.abortTransaction();
+                return res.status(400).json({ message: `Brand ${brand.name} is already assigned to this party` });
+            }
+
+            // Validate pricing type
+            if (!brand.available_prices.includes(pricing_type)) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    message: `Pricing type ${pricing_type} is not allowed for brand ${brand.name}`,
+                });
+            }
+
+            relationsToCreate.push({
+                party: partyId,
+                brand: brand_id,
+                default_price: pricing_type,
+                discount: discount || 0,
             });
         }
 
-        // Create the new brand relation
-        const newRelation = await PartyBrandRelationData.create(
-            [{
-                party: partyId,
-                brand: brandId,
-                default_price: pricing_type,
-                discount: discount || 0, // Default discount to 0 if not provided
-            }],
-            { session }
-        );
+        // Bulk insert relations
+        await PartyBrandRelationData.insertMany(relationsToCreate, { session });
 
         await session.commitTransaction();
-        res.status(201).json({ message: "Brand assigned to party successfully", relation: newRelation[0] });
+        res.status(201).json({ message: "Brands assigned to party successfully" });
     } catch (error) {
         await session.abortTransaction();
-        res.status(500).json({ message: "Error assigning brand to party", error: error.message });
+        res.status(500).json({ message: "Error assigning brands to party", error: error.message });
     } finally {
         session.endSession();
     }
