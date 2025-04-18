@@ -2,9 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { Buffer } from "buffer";
+
 
 export default function CatalogList() {
   const navigate = useNavigate();
+  const [loadingSkus, setLoadingSkus] = useState(false);
+
   const [brands, setBrands] = useState([]); // Store fetched brands
   const [catalogs, setCatalogs] = useState([]); // Store fetched catalogs
   const [skus, setSkus] = useState([]); // Store fetched SKUs
@@ -70,8 +74,9 @@ export default function CatalogList() {
   useEffect(() => {
     if (selectedCatalog) {
       const fetchSkus = async () => {
+        setLoadingSkus(true); // show loader
         try {
-          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}?limit=100&skip=0`, {
+          const response = await axios.get(`${BACKEND_URL}/sku/catalog/${selectedCatalog}`, {
             withCredentials: true,
           });
           console.log(response.data)
@@ -79,6 +84,8 @@ export default function CatalogList() {
         } catch (error) {
           console.error("Error fetching SKUs:", error.response?.data || error.message);
           alert("Failed to fetch SKUs. Please try again.");
+        }finally{
+          setLoadingSkus(false); // show loader
         }
       };
 
@@ -266,7 +273,7 @@ export default function CatalogList() {
       {selectedCatalog && (
         <button
           onClick={handleAddSku}
-          className="bg-green-400 text-white px-4 py-2 mb-4 rounded-md hover:bg-green-600"
+          className="bg-green-500 text-white px-4 py-2 mb-4 rounded-md hover:bg-green-600"
         >
           + Add SKU
         </button>
@@ -283,7 +290,9 @@ export default function CatalogList() {
       )}
 
       {/* Display SKUs */}
-      {selectedCatalog && filteredSKUs.length > 0 ? (
+      {loadingSkus ? (
+        <div className="text-center text-lg text-gray-500">Loading SKUs...</div>
+          ) : selectedCatalog && filteredSKUs.length > 0 ? (
         <div className="grid grid-cols-6 gap-4">
           {filteredSKUs.map((sku) => (
             <div key={sku._id} className="border p-4 rounded-md shadow-md bg-white">
@@ -329,10 +338,11 @@ export default function CatalogList() {
               ) : (
                 <>
                   <img
-                    src={sku.image || null}
+                    src={`data:${sku.image?.contentType};base64,${Buffer.from(sku.image?.data?.data || []).toString("base64")}`}
                     alt={sku.sku_number}
                     className="w-full h-24 object-cover mb-2 rounded-md"
                   />
+
                   <h3 className="text-lg font-semibold">{sku.sku_number}</h3>
                   <p className="text-sm text-gray-700">
                     WSR Price: <strong>₹{parseFloat(sku.wsr_price?.$numberDecimal || sku.wsr_price).toFixed(2)}</strong>
