@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import imageCompression from 'browser-image-compression';
+import pLimit from "p-limit";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function AddCatalogs() {
   const navigate = useNavigate();
 
   const [brands, setBrands] = useState([]);
+
+  const [isUploading, setIsUploading] = useState(false);
 
   const location = useLocation();
   const preselectedBrand = location.state?.preselectedBrand || "";
@@ -125,20 +128,13 @@ function AddCatalogs() {
     }
   };
 
-  const chunkArray = (arr, chunkSize) => {
-    const chunks = [];
-    for (let i = 0; i < arr.length; i += chunkSize) {
-      chunks.push(arr.slice(i, i + chunkSize));
-    }
-    return chunks;
-  };
   
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // 🚨 Prevent form from refreshing the page!
+    setIsUploading(true);
 
     try {
-      // Add catalog
-      console.log("Form Data:", formData);
+      // Your existing catalog creation code
       const catalogResponse = await axios.post(`${BACKEND_URL}/catalog/add`, {
         name: formData.catalogName,
         brand: formData.brandName,
@@ -146,75 +142,88 @@ function AddCatalogs() {
       }, {
         withCredentials: true,
       });
-
-      console.log("Catalog ID:", catalogResponse);
-      const catalogId = catalogResponse.data._id;  
-
-      const skuChunks = chunkArray(formData.skus, 3);
-
-      for (let chunkIndex = 0; chunkIndex < skuChunks.length; chunkIndex++) {
-        const chunk = skuChunks[chunkIndex];
+  
+      const catalogId = catalogResponse.data._id;
+      
+      // Upload chunks in parallel with limited concurrency
+      const chunkArray = (arr, size) => {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+          chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+      };
+  
+      const limit = pLimit(3); // Max 3 concurrent uploads
+      const skuChunks = chunkArray(formData.skus, 2);
+  
+      const uploadChunk = async (chunk, chunkIndex) => {
         const skuFormData = new FormData();
         skuFormData.append("brand", formData.brandName);
         skuFormData.append("catalog", catalogId);
-
+  
         for (let i = 0; i < chunk.length; i++) {
           const sku = chunk[i];
-          const index = i; // Keep this index local to chunk
-          if (!sku || !sku.skuCode) {
-            console.error(`Invalid SKU at index ${index} of chunk ${chunkIndex}`);
-            continue;
-          }
-
-          skuFormData.append(`skus[${index}][sku_number]`, sku.skuCode);
-          skuFormData.append(`skus[${index}][cp_price]`, sku.cpPrice);
-          skuFormData.append(`skus[${index}][wsr_price]`, sku.wsrPrice);
-
+  
+          skuFormData.append(`skus[${i}][sku_number]`, sku.skuCode);
+          skuFormData.append(`skus[${i}][cp_price]`, sku.cpPrice);
+          skuFormData.append(`skus[${i}][wsr_price]`, sku.wsrPrice);
+  
           if (sku.image instanceof File) {
-            const options = {
-              maxSizeMB: 0.1,
-              maxWidthOrHeight: 300,
-              useWebWorker: true,
-            };
-
             try {
-              const compressedImage = await imageCompression(sku.image, options);
-              const compressedFile = new File([compressedImage], sku.image.name, {
-                type: compressedImage.type,
+              const compressed = await imageCompression(sku.image, {
+                maxSizeMB: 0.1,
+                maxWidthOrHeight: 300,
+                useWebWorker: true,
+              });
+  
+              const file = new File([compressed], sku.image.name, {
+                type: compressed.type,
                 lastModified: sku.image.lastModified,
               });
-
-              skuFormData.append(`skus[${index}][image]`, compressedFile);
-            } catch (error) {
-              console.error("Image compression error: ", error);
+  
+              skuFormData.append(`skus[${i}][image]`, file);
+            } catch (err) {
+              console.error("Compression error:", err);
             }
           }
         }
-
-        // Submit the batch
-        try {
-          await axios.post(`${BACKEND_URL}/sku/add`, skuFormData, {
-            headers: { "Content-Type": "multipart/form-data" },
-            withCredentials: true,
-          });
-          console.log(`✅ Successfully saved batch ${chunkIndex + 1}`);
-        } catch (err) {
-          console.error("❌ Error saving batch:", err.response?.data || err.message);
-          alert("❌ Error saving batch:" + err.response?.data || err.message);
-        }
-      }
-     
-      alert("Catalog and SKUs added successfully!");
+  
+        await axios.post(`${BACKEND_URL}/sku/add`, skuFormData, {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        });
+  
+        console.log(`✅ Batch ${chunkIndex + 1} uploaded`);
+      };
+  
+      await Promise.all(
+        skuChunks.map((chunk, idx) => limit(() => uploadChunk(chunk, idx)))
+      );
+  
+      alert("✅ Catalog and SKUs added successfully!");
       navigate("/home/view-catalogs");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error?.message || "An unexpected error occurred";
-      console.log(errorMessage);
-      alert(`Failed to add catalog or SKUs: ${errorMessage}`);
+      console.error("❌ Upload failed:", error);
+      alert("❌ Failed to upload catalog/SKUs");
+    }
+    finally {
+      setIsUploading(false); // ⬅️ Hide loader after upload
     }
   };
-
+  
   return (
+     
     <div className="flex flex-row h-screen">
+      {isUploading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-xl shadow-md text-center">
+            <div className="loader mb-2 border-4 border-green-500 border-t-transparent rounded-full w-8 h-8 animate-spin mx-auto" />
+            <p className="text-gray-700 mt-2">Uploading SKUs, please wait...</p>
+          </div>
+        </div>
+      )}
+
       {/* Back to Catalogs Button */}
       <button
         onClick={() => navigate("/home/view-catalogs")}

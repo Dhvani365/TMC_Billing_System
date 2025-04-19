@@ -126,8 +126,8 @@ export const addSKU = async (req, res) => {
         return res.status(400).json({ message: "Invalid SKUs format" });
       }
   
-      console.log("Received SKUs: ", skus);
-      console.log("Received Files: ", req.files);
+    //   console.log("Received SKUs: ", skus);
+    //   console.log("Received Files: ", req.files);
   
       // Attach images to their respective SKUs
       for (let index = 0; index < skus.length; index++) {
