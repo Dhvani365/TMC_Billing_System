@@ -67,8 +67,8 @@ export const getSKUsByCatalog = async (req, res) => {
   
       const totalCount = await SKU.countDocuments({ catalog: catalogId });
   
-      const skus = await SKU.find({ catalog: catalogId })
-     
+      const skus = await SKU.find({ catalog: catalogId });
+  
       res.status(200).json(skus);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving SKUs", error });
@@ -109,65 +109,71 @@ export const getSKUById = async (req, res) => {
 };
 
 export const addSKU = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const { brand, catalog, skus } = req.body;
-
-    if (!Array.isArray(skus)) {
-      await session.abortTransaction();
-      return res.status(400).json({ message: "Invalid SKUs format" });
-    }
-
-    // Compress and attach images to the corresponding SKUs
-    for (let index = 0; index < skus.length; index++) {
-      const file = req.files.find(
-        (file) => file.fieldname === `skus[${index}][image]`
-      );
-
-      if (file) {
-        const compressedImageBuffer = await sharp(file.buffer)
-          .resize({ width: 300 })              // Resize (adjust width as needed)
-          .jpeg({ quality: 60 })               // Adjust quality (try 50–70)
-          .toBuffer();
-
-        skus[index].image = {
-          data: compressedImageBuffer,
-          contentType: "image/jpeg",
-        };
-      }
-    }
-
-    // Save each SKU
-    for (const sku of skus) {
-      if (!sku.sku_number) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+  
+    try {
+      const { brand, catalog } = req.body;
+      let skus = req.body.skus;
+  
+      // Parse SKUs if they are sent as a JSON string
+    //   if (typeof skus === "string") {
+    //     skus = JSON.parse(skus);
+    //   }
+  
+      if (!Array.isArray(skus)) {
         await session.abortTransaction();
-        return res.status(400).json({ message: "Missing required fields for SKU" });
+        return res.status(400).json({ message: "Invalid SKUs format" });
       }
-
-      const newSKU = new SKU({
-        brand,
-        catalog,
-        sku_number: sku.sku_number,
-        wsr_price: mongoose.Types.Decimal128.fromString(sku.wsr_price) || mongoose.Types.Decimal128.fromString("0"),
-        cp_price: mongoose.Types.Decimal128.fromString(sku.cp_price) || mongoose.Types.Decimal128.fromString("0"),
-        image: sku.image || { data: null, contentType: null },
-      });
-
-      await newSKU.save({ session });
+  
+      console.log("Received SKUs: ", skus);
+      console.log("Received Files: ", req.files);
+  
+      // Attach images to their respective SKUs
+      for (let index = 0; index < skus.length; index++) {
+        const file = req.files.find(
+          (file) => file.fieldname === `skus[${index}][image]`
+        );
+  
+        if (file) {
+          console.log(`Matched image for SKU[${index}]:`, file);
+  
+          skus[index].image = {
+            data: file.buffer,
+            contentType: file.mimetype,
+          };
+        }
+      }
+  
+      // Save each SKU
+      for (const sku of skus) {
+        if (!sku.sku_number) {
+          await session.abortTransaction();
+          return res.status(400).json({ message: "Missing required fields for SKU" });
+        }
+  
+        const newSKU = new SKU({
+          brand,
+          catalog,
+          sku_number: sku.sku_number,
+          wsr_price: mongoose.Types.Decimal128.fromString(sku.wsr_price || "0"),
+          cp_price: mongoose.Types.Decimal128.fromString(sku.cp_price || "0"),
+          image: sku.image || { data: null, contentType: null },
+        });
+  
+        await newSKU.save({ session });
+      }
+  
+      await session.commitTransaction();
+      res.status(201).json({ message: "SKUs added successfully" });
+    } catch (error) {
+      console.error("Error saving SKU:", error.message);
+      await session.abortTransaction();
+      return res.status(400).json({ message: "Error saving SKU", error: error.message });
+    } finally {
+      session.endSession();
     }
-
-    await session.commitTransaction();
-    res.status(201).json({ message: "SKUs added successfully" });
-  } catch (error) {
-    console.error("Error saving SKU:", error.message);
-    await session.abortTransaction();
-    return res.status(400).json({ message: "Error saving SKU", error: error.message });
-  } finally {
-    session.endSession();
-  }
-};
+  };  
 
 // Update SKU
 export const updateSKU = async (req, res) => {
