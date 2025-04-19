@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import imageCompression from 'browser-image-compression';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function AddCatalogs() {
@@ -64,7 +65,7 @@ function AddCatalogs() {
     }
   };
 
-  const handleSKUsChange = (index, field, value) => {
+  const handleSKUsChange = async (index, field, value) => {
     const updatedSKUs = [...formData.skus];
   
     if (field === "skuCode") {
@@ -78,7 +79,22 @@ function AddCatalogs() {
           updatedSKUs[i] = { ...updatedSKUs[i], skuCode: `SKU-${newSKUValue + (i - index)}` };
         }
       }
-    } else {
+    } 
+    // else if (field === "image") {
+    //   try {
+    //     const options = {
+    //       maxSizeMB: 0.1, // Compress to ~100 KB
+    //       maxWidthOrHeight: 800, // Resize if needed
+    //       useWebWorker: true,
+    //     };
+    //     const compressedFile = await imageCompression(value, options);
+    //     updatedSKUs[index] = { ...updatedSKUs[index], image: compressedFile };
+    //   } catch (error) {
+    //     console.error("Image compression failed:", error);
+    //     updatedSKUs[index] = { ...updatedSKUs[index], image: value }; // Fallback to original
+    //   }
+    // } 
+    else {
       // Update other fields (e.g., image, cpPrice, wsrPrice)
       updatedSKUs[index] = { ...updatedSKUs[index], [field]: value };
     }
@@ -138,22 +154,57 @@ function AddCatalogs() {
       const skuFormData = new FormData();
       skuFormData.append("brand", formData.brandName);
       skuFormData.append("catalog", catalogId);
-      formData.skus.forEach((sku, index) => {
+     
+      const compressImageAndAppend = async (sku, index) => {
         if (!sku.skuCode) {
           throw new Error(`Missing required fields for SKU at index ${index}`);
         }
+      
+        // Append SKU basic info
         skuFormData.append(`skus[${index}][sku_number]`, sku.skuCode);
         skuFormData.append(`skus[${index}][cp_price]`, sku.cpPrice);
         skuFormData.append(`skus[${index}][wsr_price]`, sku.wsrPrice);
+      
         if (sku.image instanceof File) {
-          skuFormData.append(`skus[${index}][image]`, sku.image);
+          const options = {
+            maxSizeMB: 0.3, // ~300 KB
+            maxWidthOrHeight: 500,
+            useWebWorker: true,
+          };
+      
+          try {
+            // Compress image
+            const compressedImage = await imageCompression(sku.image, options);
+            const compressedFile = new File([compressedImage], sku.image.name, {
+              type: compressedImage.type,
+              lastModified: sku.image.lastModified,
+              lastModifiedDate: sku.image.lastModifiedDate,
+            });
+      
+            // Log the original and compressed image details for debugging
+            console.log("Original Image: ", sku.image);
+            console.log("Compressed Image: ", compressedFile);
+      
+            // Append the compressed image to FormData
+            skuFormData.append(`skus[${index}][image]`, compressedFile);
+          } catch (error) {
+            console.error("Error during image compression: ", error);
+          }
         }
-      });
+      };
+      
+      // Use for...of to ensure async operations are awaited
+      for (let index = 0; index < formData.skus.length; index++) {
+        await compressImageAndAppend(formData.skus[index], index);
+      }
+      
+      // Log the form data entries for debugging before sending
+      for (let pair of skuFormData.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
+      }
 
-      console.log(skuFormData)
       await axios.post(`${BACKEND_URL}/sku/add`, skuFormData, {
         headers: { "Content-Type": "multipart/form-data" },
-      }, {
         withCredentials: true,
       });
 
