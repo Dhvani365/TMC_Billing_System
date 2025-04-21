@@ -172,32 +172,13 @@ const BillArea = () => {
         </tr>
         <tr>
             <td colspan="2" class="left"><strong>Delivery Note</strong><br>5124</td>
-            <td colspan="3" class="left"><strong>Mode/Terms of Payment</strong></td>
-        </tr>
-        <tr>
-            <td colspan="2" class="left"><strong>Reference No. & Date</strong><br>5124</td>
-            <td colspan="3" class="left"><strong>Other Reference(s)</strong></td>
+            <td colspan="3" class="left"><strong>Mode/Terms of Payment</strong><br>Immediately/30 Days/________</td>
         </tr>
         </table>
   
         <table>
           <tr>
             <td colspan="4" rowspan="2" width="50%">
-                <strong>Consignee (Ship to)</strong><br>
-                ${selectedClient.name}<br>
-                ${selectedClient.address}<br>
-                <strong>GSTIN/UIN:</strong> ${selectedClient.gst_no}<br>
-                <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24
-            </td>
-            <td colspan="2" class="left"><strong>Dispatch Doc No.</strong></td>
-            <td colspan="3" class="left"><strong>Delivery Note Date</strong><br>18-Jan-25</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="left"><strong>Dispatched through</strong></td>
-            <td colspan="3" class="left"><strong>Destination</strong></td>
-        </tr>
-        <tr>
-            <td colspan="4" rowspan="2">
                 <strong>Buyer (Bill to)</strong><br>
                 ${selectedClient.name}<br>
                 ${selectedClient.address}<br>
@@ -205,9 +186,12 @@ const BillArea = () => {
                 <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24<br>
                 <strong>Place to Supply:</strong> Gujarat
             </td>
+            <td colspan="2" class="left"><strong>Dispatch Doc No.</strong></td>
+            <td colspan="3" class="left"><strong>Delivery Note Date</strong><br>18-Jan-25</td>
         </tr>
         <tr>
-            <td colspan="5" rowspan="2" class="left"><strong>Terms of Delivery</strong></td>
+            <td colspan="2" class="left"><strong>Dispatched through</strong></td>
+            <td colspan="3" class="left"><strong>Destination</strong></td>
         </tr>
         </table>
   
@@ -244,7 +228,7 @@ const BillArea = () => {
           </tbody>
         </table>
 
-        <!-- Tax Calculation -->
+        <!-- Tax Calculation
     <table>
         <tr>
             <td colspan="9"><strong>Amount Chargeable (in words):</strong> INR ${amountChargeableInWords}</td>
@@ -272,7 +256,7 @@ const BillArea = () => {
         <tr>
             <td colspan="9"><strong>Tax Amount (in words):</strong> INR ${taxAmountInWords}</td>
         </tr>
-    </table>
+    </table> -->
     
     <table>
         <tr>
@@ -494,56 +478,56 @@ new Table({
 }),
 blankLine,
 // --- Table 4: Amount Chargeable + Tax Table ---
-new Table({
-  rows: [
-    new TableRow({
-      children: [
-        paddedCell([
-          new Paragraph({
-            children: [new TextRun({ text: `Amount Chargeable (in words): INR ${numberToWords(grandTotal)}`, bold: true })]
-          })
-        ], { columnSpan: 6 })
-      ]
-    }),
-    new TableRow({
-      children: [
-        paddedCell([new Paragraph({ children: [new TextRun({ text: "Taxable Value", bold: true })] })], { rowSpan: 2 }),
-        paddedCell([new Paragraph({ children: [new TextRun({ text: "Central Tax", bold: true })] })], { columnSpan: 2 }),
-        paddedCell([new Paragraph({ children: [new TextRun({ text: "State Tax", bold: true })] })], { columnSpan: 2 }),
-        paddedCell([new Paragraph({ children: [new TextRun({ text: "Total Tax Amount", bold: true })] })], { rowSpan: 2 }),
-      ]
-    }),
-    new TableRow({
-      children: [
-        paddedCell([new Paragraph("Value")]),
-        paddedCell([new Paragraph("Rate")]),
-        paddedCell([new Paragraph("Value")]),
-        paddedCell([new Paragraph("Rate")]),
-      ]
-    }),
-    new TableRow({
-      children: [
-        paddedCell([new Paragraph(`₹${total.toFixed(2)}`)]),
-        paddedCell([new Paragraph(`₹${cgst.toFixed(2)}`)]),
-        paddedCell([new Paragraph("2.50%")]),
-        paddedCell([new Paragraph(`₹${sgst.toFixed(2)}`)]),
-        paddedCell([new Paragraph("2.50%")]),
-        paddedCell([new Paragraph(`₹${totalTax.toFixed(2)}`)])
-      ]
-    }),
-    new TableRow({
-      children: [
-        paddedCell([
-          new Paragraph({
-            children: [new TextRun({ text: `Tax Amount (in words): INR ${numberToWords(cgst + sgst)}`, bold: true })]
-          })
-        ], { columnSpan: 6 })
-      ]
-    }),
-  ],
-  width: { size: 100, type: WidthType.PERCENTAGE }
-}),
-blankLine,
+// new Table({
+//   rows: [
+//     new TableRow({
+//       children: [
+//         paddedCell([
+//           new Paragraph({
+//             children: [new TextRun({ text: `Amount Chargeable (in words): INR ${numberToWords(grandTotal)}`, bold: true })]
+//           })
+//         ], { columnSpan: 6 })
+//       ]
+//     }),
+//     new TableRow({
+//       children: [
+//         paddedCell([new Paragraph({ children: [new TextRun({ text: "Taxable Value", bold: true })] })], { rowSpan: 2 }),
+//         paddedCell([new Paragraph({ children: [new TextRun({ text: "Central Tax", bold: true })] })], { columnSpan: 2 }),
+//         paddedCell([new Paragraph({ children: [new TextRun({ text: "State Tax", bold: true })] })], { columnSpan: 2 }),
+//         paddedCell([new Paragraph({ children: [new TextRun({ text: "Total Tax Amount", bold: true })] })], { rowSpan: 2 }),
+//       ]
+//     }),
+//     new TableRow({
+//       children: [
+//         paddedCell([new Paragraph("Value")]),
+//         paddedCell([new Paragraph("Rate")]),
+//         paddedCell([new Paragraph("Value")]),
+//         paddedCell([new Paragraph("Rate")]),
+//       ]
+//     }),
+//     new TableRow({
+//       children: [
+//         paddedCell([new Paragraph(`₹${total.toFixed(2)}`)]),
+//         paddedCell([new Paragraph(`₹${cgst.toFixed(2)}`)]),
+//         paddedCell([new Paragraph("2.50%")]),
+//         paddedCell([new Paragraph(`₹${sgst.toFixed(2)}`)]),
+//         paddedCell([new Paragraph("2.50%")]),
+//         paddedCell([new Paragraph(`₹${totalTax.toFixed(2)}`)])
+//       ]
+//     }),
+//     new TableRow({
+//       children: [
+//         paddedCell([
+//           new Paragraph({
+//             children: [new TextRun({ text: `Tax Amount (in words): INR ${numberToWords(cgst + sgst)}`, bold: true })]
+//           })
+//         ], { columnSpan: 6 })
+//       ]
+//     }),
+//   ],
+//   width: { size: 100, type: WidthType.PERCENTAGE }
+// }),
+// blankLine,
 
     
           // --- Table 5: Declaration + Bank + Signature ---
