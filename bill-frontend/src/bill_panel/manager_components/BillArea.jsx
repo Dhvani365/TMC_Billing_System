@@ -117,7 +117,7 @@ const BillArea = () => {
         <center>Tax Invoice</center>
         <table>
           <tr>
-            <td colspan="4" rowspan="3" width="50%">
+            <td colspan="4" rowspan="2" width="50%">
               <strong>GIRNAR FASHION</strong><br>
               Avadh Textile Market, Surat, Gujarat<br>
                 <strong>GSTIN/UIN:</strong> 24CMPPS0737K1ZK<br>
@@ -134,31 +134,11 @@ const BillArea = () => {
             <td colspan="2" class="left"><strong>Delivery Note</strong><br>5124</td>
             <td colspan="3" class="left"><strong>Mode/Terms of Payment</strong></td>
         </tr>
-        <tr>
-            <td colspan="2" class="left"><strong>Reference No. & Date</strong><br>5124</td>
-            <td colspan="3" class="left"><strong>Other Reference(s)</strong></td>
-        </tr>
         </table>
   
         <table>
           <tr>
             <td colspan="4" rowspan="2" width="50%">
-                <strong>Consignee (Ship to)</strong><br>
-                UCA Lifestyle<br>
-                Flat No.404, Manglam Apartment,<br>
-                Shetranjiwad, Begumpura, Surat<br>
-                <strong>GSTIN/UIN:</strong> 24GORPS9172G2Z3<br>
-                <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24
-            </td>
-            <td colspan="2" class="left"><strong>Dispatch Doc No.</strong></td>
-            <td colspan="3" class="left"><strong>Delivery Note Date</strong><br>18-Jan-25</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="left"><strong>Dispatched through</strong></td>
-            <td colspan="3" class="left"><strong>Destination</strong></td>
-        </tr>
-        <tr>
-            <td colspan="4" rowspan="2">
                 <strong>Buyer (Bill to)</strong><br>
                 UCA Lifestyle<br>
                 Flat No.404, Manglam Apartment,<br>
@@ -167,9 +147,12 @@ const BillArea = () => {
                 <strong>State Name:</strong> Gujarat, <strong>Code:</strong> 24<br>
                 <strong>Place to Supply:</strong> Gujarat
             </td>
+            <td colspan="2" class="left"><strong>Dispatch Doc No.</strong></td>
+            <td colspan="3" class="left"><strong>Delivery Note Date</strong><br>18-Jan-25</td>
         </tr>
         <tr>
-            <td colspan="5" rowspan="2" class="left"><strong>Terms of Delivery</strong></td>
+            <td colspan="2" class="left"><strong>Dispatched through</strong></td>
+            <td colspan="3" class="left"><strong>Destination</strong></td>
         </tr>
         </table>
   
@@ -206,7 +189,7 @@ const BillArea = () => {
           </tbody>
         </table>
 
-        <!-- Tax Calculation -->
+        <!-- Tax Calculation 
     <table>
         <tr>
             <td colspan="9"><strong>Amount Chargeable (in words):</strong> INR ${amountChargeableInWords}</td>
@@ -234,7 +217,7 @@ const BillArea = () => {
         <tr>
             <td colspan="9"><strong>Tax Amount (in words):</strong> INR ${taxAmountInWords}</td>
         </tr>
-    </table>
+    </table>-->
     
     <table>
         <tr>
